@@ -1,0 +1,60 @@
+{
+    "plugins": [
+        {
+            "type": "add",
+            "pluginName": "fleet.spring.boot"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.json"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.xml"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.git.frontend"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.intellij"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.network"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.ssh"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.space"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.wsl"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.smartMode"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.image.view"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.java"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.maven"
+        },
+        {
+            "type": "add",
+            "pluginName": "fleet.docker"
+        }
+    ]
+}

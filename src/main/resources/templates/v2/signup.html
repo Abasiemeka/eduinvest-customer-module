@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhaseBook</title>
+    <link rel="stylesheet" href="../../static/css/styles.css">
+</head>
+<body>
+<header>
+    <h1 align="center">Welcome to PhaseBook</h1>
+</header>
+<main>
+    <section id="signup">
+        <div align="center">
+            <h2>Sign Up</h2>
+            <!-- Sign up form -->
+            <form th:action="@{/signup}" th:object="${userSignupDto}" method="post">
+                <input type="text" name="username" placeholder="Username">
+                <input type="text" name="email" placeholder="Email">
+                <input type="password" name="password" placeholder="Password">
+                <button type="submit">Sign Up</button>
+            </form>
+            <h2>  </h2>
+            <h2> <link target="../login.html"> goto Login</h2>
+        </div>
+    </section>
+</main>
+</body>
+</html>

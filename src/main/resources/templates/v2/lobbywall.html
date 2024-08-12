@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wall - PhaseBook</title>
+    <link rel="stylesheet" href="../../static/css/styles.css">
+</head>
+<body>
+<header>
+    <h1 align="center">Welcome to the General Wall</h1>
+</header>
+<main>
+    <section id="wall-posts" align="center">
+        <h2>Wall Posts</h2>
+        <!-- List of wall posts -->
+        <ul align="center">
+            <li th:each="post : ${wallPosts}">
+                <div align="center" th:text="${post.author.username}"></div>
+                <div align="center" th:text="${post.content}"></div>
+                <div align="center">
+                    <span th:text="${post.likes}"></span> likes
+                    <a th:href="@{'/like/' + ${post.id}}">Like</a>
+                </div>
+                <form th:action="@{'/comment/' + ${post.id}}" method="post">
+                    <input type="text" name="comment" placeholder="Add a comment...">
+                    <button type="submit">Comment</button>
+                </form>
+                <ul>
+                    <!-- List of comments on the post -->
+                    <li th:each="comment : ${post.comments}">
+                        <div th:text="${comment.author.username}"></div>
+                        <div th:text="${comment.content}"></div>
+                        <div>
+                            <span th:text="${comment.likes}"></span> likes
+                            <a th:href="@{'/like/' + ${comment.id}}">Like</a>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <!-- Pagination -->
+        <div id="pagination">
+            <ul>
+                <li th:each="page : ${pages}" th:text="${page}">
+                    <a th:href="@{'/wall?page=' + ${page}}"></a>
+                </li>
+            </ul>
+        </div>
+    </section>
+</main>
+<a th:href="@{/logout}" align="center">Logout</a>
+</body>
+</html>

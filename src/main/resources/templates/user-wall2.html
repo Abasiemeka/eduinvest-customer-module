@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5">
+    <title>User Wall</title>
+    <style>
+        .body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 1, 0, 0.1);
+            padding: 20px;
+        }
+
+        .navbar {
+            background-color: #4267B2;
+            color: #fff;
+            padding: 10px 0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .navbar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        .navbar ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+
+        .navbar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .navbar ul li a:hover {
+            color: #ccc;
+        }
+
+        .new-post {
+            margin-bottom: 20px;
+        }
+
+        .new-post form {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .new-post textarea {
+            width: 60%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 3px solid #cccba;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .new-post select, .new-post button {
+            height: 35px;
+            length: 80px
+            padding: 30px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4267B2;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .new-post select:hover, .new-post button:hover {
+            background-color: #29487d;
+        }
+
+        .posts .post {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-content {
+            margin-bottom: 10px;
+        }
+
+        .post-actions button {
+            margin-right: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4267B2;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .post-actions button:hover {
+            background-color: #29487d;
+        }
+
+        .post-actions a {
+            color: #4267B2;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .post-actions a:hover {
+            color: #29487d;
+        }
+
+        .pagination li {
+            display: inline
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Navigation bar -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="/user-profile">My Profile</a></li>
+            <li><a href="/friends">My Friends</a></li>
+            <li><a href="/friend-requests">Friend Requests</a></li>
+            <li><a href="/user-posts">My Posts</a></li>
+            <!-- Add other necessary links -->
+        </ul>
+    </nav>
+
+    <!-- New post form -->
+    <div class="new-post">
+        <form th:action="@{/user-wall/create-post}" method="post">
+            <textarea name="content" rows="4" cols="50" placeholder="Write something..."></textarea>
+            <select name="postVisibility">
+                <option value="PUBLIC">Public</option>
+                <option value="FRIENDS">Friends</option>
+                <option value="PRIVATE">Private</option>
+            </select>
+            <button type="submit">Post</button>
+        </form>
+    </div>
+
+    <div>
+        <!-- Iterate over each post in the paginated posts list -->
+        <div th:each="post : ${postsPage.content}">
+            <!-- Display post content -->
+            <p th:text="${post.content}"></p>
+            <!-- Add more elements to display other post details as needed -->
+        </div>
+
+        <!-- Pagination -->
+        <ul class="pagination">
+            <li th:if="${postsPage.hasPrevious()}" class="page-item">
+                <a th:href="@{'?page=' + ${postsPage.number - 1}}" class="page-link">Previous</a>
+            </li>
+            <li th:each="pageNumber : ${#numbers.sequence(0, postsPage.totalPages - 1)}" class="page-item"
+                th:classappend="${postsPage.number == pageNumber} ? 'active'">
+                <a th:href="@{'?page=' + ${pageNumber}}" class="page-link" th:text="${pageNumber + 1}"></a>
+            </li>
+            <li th:if="${postsPage.hasNext()}" class="page-item">
+                <a th:href="@{'?page=' + ${postsPage.number + 1}}" class="page-link">Next</a>
+            </li>
+        </ul>
+    </div>
+
+
+    <!-- Paginated posts -->
+    <div class="posts">
+        <div th:each="post : ${pagedPosts.content}" class="post">
+            <div class="post-content" th:text="${post.content}"></div>
+            <div class="post-actions">
+                <!-- React to post -->
+                <form id="likeForm" th:action="@{/user-wall/react/{postId}/{reactionType}(postId=${post.id}, reactionType='like')}" method="post">
+                    <button type="button" onclick="reactToPost('like', '${post.id}')">Like</button>
+                </form>
+                <form id="dislikeForm" th:action="@{/user-wall/react/{postId}/{reactionType}(postId=${post.id}, reactionType='dislike')}" method="post">
+                    <button type="button" onclick="reactToPost('dislike', '${post.id}')">Dislike</button>
+                </form>
+                <!-- Show comments -->
+                <a href="#" th:href="@{/post-comments/{postId}(postId=${post.id})}" onclick="showComments(event, '${post.id}')">View Comments</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination controls -->
+    <div class="pagination">
+        <ul>
+            <li><a href="#" onclick="loadPage(1)">First</a></li>
+            <li><a href="#" onclick="loadPage(${pagedPosts.number - 1})">Previous</a></li>
+            <li><a href="#" onclick="loadPage(${pagedPosts.number + 1})">Next</a></li>
+            <li><a href="#" onclick="loadPage(${pagedPosts.totalPages})">Last</a></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function reactToPost(reactionType, postId) {
+        var formId = (reactionType === 'like') ? 'likeForm' : 'dislikeForm';
+        var form = document.getElementById(formId);
+        var formData = new FormData(form);
+        var xhr = new XMLHttpRequest();
+        xhr.open(form.method, form.action, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Reload the page or update the UI as needed
+                location.reload();
+            } else {
+                // Handle errors
+            }
+        };
+        xhr.send(formData);
+    }
+
+    function showComments(event, postId) {
+        event.preventDefault();
+        // Make AJAX request to fetch and display comments for the specified post
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/post-comments/' + postId, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Display comments in a modal or update the UI as needed
+                alert('Comments: ' + xhr.responseText);
+            } else {
+                // Handle errors
+            }
+        };
+        xhr.send();
+    }
+
+    function loadPage(pageNumber) {
+        // Make AJAX request to fetch posts for the specified page number
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/user-wall?page=' + pageNumber, true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Update the posts section with the new content
+                document.querySelector('.posts').innerHTML = xhr.responseText;
+            } else {
+                // Handle errors
+            }
+        };
+        xhr.send();
+    }
+</script>
+</body>
+</html>

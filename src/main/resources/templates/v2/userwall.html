@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home - Twitter Clone</title>
+    <link rel="stylesheet" href="../../static/css/styles.css">
+</head>
+<body>
+<header align="center">
+    <h1 align="center">Welcome to Your Personal Wall</h1>
+</header>
+<main>
+    <section id="create-post">
+        <h2 align="center">Create Post</h2>
+        <!-- Create post form -->
+        <div align="center">
+            <form th:action="@{/create-post}" method="post">
+                <textarea name="content" placeholder="Write your post here"></textarea>
+                <button type="submit">Post</button>
+            </form>
+        </div>
+    </section>
+    <section id="user-posts" align="center">
+        <h2>Your Posts</h2>
+        <!-- List of user's posts -->
+        <ul align="center">
+            <li th:each="post : ${userPosts}">
+                <div th:text="${post.content}">
+                <div align="center">
+                    <span th:text="${post.likes}"></span> likes
+                    <a th:href="@{'/like/' + ${post.id}}">Like</a>
+                </div>
+                <form th:action="@{'/comment/' + ${post.id}}" method="post" align="center">
+                    <input type="text" name="comment" placeholder="Add a comment...">
+                    <button type="submit">Comment</button>
+                </form>
+                <ul align="center">
+                    <li th:each="comment : ${post.comments}">
+                        <div th:text="${comment.content}"></div>
+                        <div>
+                            <span th:text="${comment.likes}" align="right"></span> likes
+                            <a th:href="@{'/like/' + ${comment.id}}">Like</a>
+                        </div>
+                    </li>
+                </ul>
+                </div>
+            </li>
+        </ul>
+    </section>
+</main>
+</body>
+</html>

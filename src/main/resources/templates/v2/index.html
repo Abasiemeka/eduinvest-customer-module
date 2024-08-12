@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+<h1 align="center">Welcome to PhaseBook</h1>
+<h4 align="center">a FaceBook parody site by Abasiemeka...</h4>
+<div class="container text-center" align="center">
+    <div class="row">
+        <div class="col">
+            <h3 align="right" th:text="${owner.name}"></h3>
+        </div>
+        <div class="col-6">
+            <h2 align="center">Posts</h2>
+        </div>
+        <div class="col">
+            3 of 3
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            1 of 3
+        </div>
+        <div class="col-5">
+            2 of 3 (wider)
+        </div>
+        <div class="col">
+            3 of 3
+        </div>
+    </div>
+</div>
+</body>
+</html>

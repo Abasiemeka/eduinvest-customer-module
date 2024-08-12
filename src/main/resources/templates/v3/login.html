@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhaseBook</title>
+    <link rel="stylesheet" href="../../static/css/styles.css">
+</head>
+<body>
+<header>
+    <h1 align="center">Welcome to PhaseBook</h1>
+</header>
+<main>
+    <div align="center">
+        <section id="login">
+            <h2>Login</h2>
+            <!-- Login form -->
+            <form th:action="@{/login}" method="GET">
+                <input type="text" name="username" placeholder="Username">
+                <input type="password" name="password" placeholder="Password">
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Phasebook home</title>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+<!--        /* Add custom styles here */-->
+        .post {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1 align="center">Welcome to PhaseBook</h1>
+</header>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Public posts -->
+            <h2>Public Posts</h2>
+            <div th:each="post, postStat : ${pagedPosts.getContent}">
+                <div class="post">
+                    <h3 th:text="${post.getPostCreator}"></h3>
+                    <p th:text="${post.getPostContent}"></p>
+                </div>
+            </div>
+            <!-- Pagination -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${pagedPosts.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{${url}(page=1)}">First</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagedPosts.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{${url}(page=${pagedPosts.number - 1})}">Previous</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagedPosts.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{${url}(page=${pagedPosts.number + 1})}">Next</a>
+                    </li>
+                    <li class="page-item" th:classappend="${pagedPosts.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{${url}(page=${pagedPosts.totalPages})}">Last</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-md-4">
+            <!-- Sign up and login links -->
+            <h2>Join Facebook</h2>
+            <p>Connect with friends and be posting upandan.</p>
+            <a th:href="@{/signup}" class="btn btn-primary btn-block mb-3">Sign Up</a>
+            <a th:href="@{/login}" class="btn btn-secondary btn-block">Log In</a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS (optional) -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
