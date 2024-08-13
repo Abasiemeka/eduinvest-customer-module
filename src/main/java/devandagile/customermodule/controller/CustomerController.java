@@ -1,5 +1,6 @@
 package devandagile.customermodule.controller;
 
+import devandagile.customermodule.config.security.SecurityConfig;
 import devandagile.customermodule.model.dto.SignupDTO;
 import devandagile.customermodule.model.dto.SimpleMailDTO;
 import devandagile.customermodule.model.entity.Customer;
@@ -9,8 +10,10 @@ import devandagile.customermodule.service.VerificationService;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/customer")
@@ -20,18 +23,18 @@ public class CustomerController {
 	private final EmailService emailService;
 	private final CustomerService customerService;
 	private final VerificationService verificationService;
-	private final BCryptPasswordEncoder passwordEncoder;
+	private final SecurityConfig securityConfig;
 
 	public CustomerController(Environment env,
 	                          EmailService emailService,
 	                          CustomerService customerService,
 	                          VerificationService verificationService,
-	                          BCryptPasswordEncoder passwordEncoder) {
+	                          SecurityConfig securityConfig) {
 		this.env = env;
 		this.emailService = emailService;
 		this.customerService = customerService;
 		this.verificationService = verificationService;
-		this.passwordEncoder = passwordEncoder;
+		this.securityConfig = securityConfig;
 	}
 
 	@PostMapping("/signup")
@@ -40,7 +43,7 @@ public class CustomerController {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
 		}
 		else {
-			customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+			customer.setPassword(securityConfig.passwordEncoder().encode(customer.getPassword()));
 			Customer createdCustomer = customerService.signup(customer);
 
 			emailService.sendSimpleMailMessage(
@@ -51,7 +54,7 @@ public class CustomerController {
 							"Hello " + customer.getFirstName()
 									+", kindly click on the link below to complete your EduInvest registration.\n"
 									+"https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
-									+ verificationService.getVerificationToken(createdCustomer.getEmail(), 15, 10)));
+									+ verificationService.createVerificationAndGetToken(createdCustomer.getEmail(), 10)));
 		}
 		return ResponseEntity.status(HttpStatus.CREATED).body("Account created.");
 	}

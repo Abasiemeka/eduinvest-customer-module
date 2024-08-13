@@ -13,8 +13,8 @@ public class VerificationServiceImpl implements VerificationService {
 
 
 	@Override
-	public String getVerificationToken(String email, Integer tokenLength, Integer validityDuration) {
-		Verification verification = new Verification(email, 15, 10);
+	public String createVerificationAndGetToken(String email, Integer validityDuration) {
+		Verification verification = new Verification(email, 10);
 		verificationRepository.save(verification);
 		return verification.getToken();
 	}

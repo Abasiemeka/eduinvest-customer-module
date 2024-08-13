@@ -2,11 +2,12 @@ package devandagile.customermodule.model.entity;
 
 import devandagile.customermodule.enums.ProductType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
