@@ -11,4 +11,6 @@ public interface CustomerService {
 	Customer signup(SignupDTO customer);
 
 	void verifyCustomerEmail(String vtoken);
+
+	boolean userExists(String email);
 }

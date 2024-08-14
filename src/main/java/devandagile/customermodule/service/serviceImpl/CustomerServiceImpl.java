@@ -37,11 +37,16 @@ public class CustomerServiceImpl implements CustomerService {
 				.build();
 
 		customerRepository.save(newCustomer);
-		return null;
+		return newCustomer;
 	}
 
 	@Override
 	public void verifyCustomerEmail(String vtoken) {
 
+	}
+
+	@Override
+	public boolean userExists(String email) {
+		return getCustomerByEmail(email) != null;
 	}
 }

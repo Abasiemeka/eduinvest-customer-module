@@ -7,21 +7,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.HashSet;
+
 @SuperBuilder
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
 public class Child extends Person {
+	@OneToMany(mappedBy = "child")
+	private HashSet<InvestmentDetails> investmentDetailsSet;
 
 	@ManyToOne(
 			targetEntity = Customer.class,
-			cascade = CascadeType.ALL,
-			fetch = FetchType.LAZY,
-			optional = false)
+			cascade = CascadeType.DETACH,
+			fetch = FetchType.LAZY)
 	private Customer customer;
 
-	@OneToOne
-	private InvestmentDetails investmentDetails;
+	@OneToMany
+	@JoinColumn(name = "product_id", referencedColumnName = "id")
+	private HashSet<Product> productSet;
 
 }

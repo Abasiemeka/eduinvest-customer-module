@@ -28,6 +28,7 @@ public class Verification {
 	@Email
 	private String email;
 
+	@Column(nullable = false, unique = true)
 	private String token;
 	private LocalDateTime expiresAt;
 	private Integer validityDuration;

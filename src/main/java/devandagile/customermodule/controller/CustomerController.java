@@ -6,57 +6,76 @@ import devandagile.customermodule.model.dto.SimpleMailDTO;
 import devandagile.customermodule.model.entity.Customer;
 import devandagile.customermodule.service.CustomerService;
 import devandagile.customermodule.service.EmailService;
+import devandagile.customermodule.service.EmailServiceOAuth;
 import devandagile.customermodule.service.VerificationService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/customer")
+@Validated
 public class CustomerController {
+
+	private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
 	private final Environment env;
 	private final EmailService emailService;
+	private final EmailServiceOAuth emailServiceOAuth;
 	private final CustomerService customerService;
 	private final VerificationService verificationService;
 	private final SecurityConfig securityConfig;
 
 	public CustomerController(Environment env,
-	                          EmailService emailService,
+	                          EmailService emailService, EmailServiceOAuth emailServiceOAuth,
 	                          CustomerService customerService,
 	                          VerificationService verificationService,
 	                          SecurityConfig securityConfig) {
 		this.env = env;
 		this.emailService = emailService;
+		this.emailServiceOAuth = emailServiceOAuth;
 		this.customerService = customerService;
 		this.verificationService = verificationService;
 		this.securityConfig = securityConfig;
 	}
 
+	@GetMapping("/signup")
+	public ResponseEntity<String> signup() {
+		return ResponseEntity.status(HttpStatus.FOUND).body("Welcome to EduInvest Signup Page");
+	}
+
 	@PostMapping("/signup")
-	public ResponseEntity<String> signup(@RequestBody SignupDTO customer) {
-		if(customerService.getCustomerByEmail(customer.getEmail()) != null) {
+	public ResponseEntity<String> signup(@Valid @RequestBody SignupDTO customer) {
+		if (customerService.userExists(customer.getEmail())) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
 		}
-		else {
-			customer.setPassword(securityConfig.passwordEncoder().encode(customer.getPassword()));
-			Customer createdCustomer = customerService.signup(customer);
 
-			emailService.sendSimpleMailMessage(
-					new SimpleMailDTO(
-							createdCustomer.getEmail(),
-							env.getProperty("MAIL_USERNAME"),
-							"Confirm email address to complete EduInvest Registration",
-							"Hello " + customer.getFirstName()
-									+", kindly click on the link below to complete your EduInvest registration.\n"
-									+"https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
-									+ verificationService.createVerificationAndGetToken(createdCustomer.getEmail(), 10)));
-		}
-		return ResponseEntity.status(HttpStatus.CREATED).body("Account created.");
+		// Encode password, create customer and log result.
+		customer.setPassword(securityConfig.passwordEncoder().encode(customer.getPassword()));
+		Customer createdCustomer = customerService.signup(customer);
+
+		logger.info("Customer created successfully as follows: " +
+						"Customer name = {}, Customer email = {}",
+				createdCustomer.getFirstName()+" "+createdCustomer.getLastName(), createdCustomer.getEmail());
+
+		// Generate verification token and send email
+		String verificationToken = verificationService.createVerificationAndGetToken(customer.getEmail(), 10);
+		emailServiceOAuth.sendEmail(
+				new SimpleMailDTO(
+						createdCustomer.getEmail(),
+						"Confirm email address to complete EduInvest Registration",
+						"Hello " + customer.getFirstName()
+								+ ", kindly click on the link below to complete your EduInvest registration.\n"
+								+ "https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
+								+ verificationToken)
+		);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body("Account created. Awaiting email verification.");
 	}
 
 //	@GetMapping("/verify-mail")
@@ -72,7 +91,7 @@ public class CustomerController {
 //		}
 //		return ResponseEntity.status(HttpStatus.CREATED).body("Account created.");
 //	}
-//
+
 //	@GetMapping("/{id}")
 //	public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
 //		Customer customer = customerService.getCustomerById(id);

@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 @NoArgsConstructor
@@ -23,5 +24,13 @@ public class Customer extends Person {
 
 	@OneToMany
 	@JoinColumn(name = "investment_details", referencedColumnName = "id")
-	private List<InvestmentDetails> investmentDetails;
+	private HashSet<InvestmentDetails> investmentDetailsSet;
+
+	@OneToMany
+	@JoinColumn(name = "child_id", referencedColumnName = "id")
+	private HashSet<Child> childSet;
+
+	@OneToMany
+	@JoinColumn(name = "product-id", referencedColumnName = "id")
+	private HashSet<Product> productSet;
 }

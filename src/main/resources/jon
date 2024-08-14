@@ -1,0 +1,18 @@
+{
+  "web": {
+    "client_id": "428517625913-c5mvsjiqr0esdegu6dfrjla9calrq5dq.apps.googleusercontent.com",
+    "project_id": "eduinvest-customer-module",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret": "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",
+    "redirect_uris": [
+      "http://localhost:7075",
+      "https://localhost:7075"
+    ],
+    "javascript_origins": [
+      "http://localhost:7075",
+      "https://localhost:7075"
+    ]
+  }
+}

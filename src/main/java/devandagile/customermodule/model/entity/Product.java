@@ -3,8 +3,10 @@ package devandagile.customermodule.model.entity;
 import devandagile.customermodule.enums.ProductType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,11 +24,12 @@ public class Product {
 	private Integer productDuration;
 	private LocalDate purchaseDate;
 
-	@OneToOne
-	@JoinColumn(name = "customer_id", nullable = false, updatable = false, referencedColumnName = "id")
+	@ManyToOne(targetEntity = Customer.class, cascade = CascadeType.DETACH)
 	private Customer customer;
 
-	@OneToOne
-	@JoinColumn(name = "child_id", nullable = false, updatable = false, referencedColumnName = "id")
+	@ManyToOne(targetEntity = Child.class, cascade = CascadeType.DETACH)
 	private Child child;
+
+	@OneToMany(mappedBy = "product")
+	private HashSet<InvestmentDetails> investmentDetailsSet;
 }
