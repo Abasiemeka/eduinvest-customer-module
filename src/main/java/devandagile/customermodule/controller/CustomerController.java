@@ -1,9 +1,7 @@
 package devandagile.customermodule.controller;
 
-import devandagile.customermodule.config.security.SecurityConfig;
-import devandagile.customermodule.model.dto.LoginDTO;
-import devandagile.customermodule.model.dto.SignupDTO;
-import devandagile.customermodule.model.dto.SimpleMailDTO;
+import devandagile.customermodule.config.security.PasswordEncoder;
+import devandagile.customermodule.model.dto.*;
 import devandagile.customermodule.model.entity.Child;
 import devandagile.customermodule.model.entity.Customer;
 import devandagile.customermodule.model.enums.Gender;
@@ -33,19 +31,19 @@ public class CustomerController {
 	private final EmailServiceOAuth emailServiceOAuth;
 	private final CustomerService customerService;
 	private final VerificationService verificationService;
-	private final SecurityConfig securityConfig;
+	private final PasswordEncoder passwordEncoder;
 
 	public CustomerController(Environment env,
 	                          EmailService emailService, EmailServiceOAuth emailServiceOAuth,
 	                          CustomerService customerService,
 	                          VerificationService verificationService,
-	                          SecurityConfig securityConfig) {
+	                          PasswordEncoder passwordEncoder) {
 		this.env = env;
 		this.emailService = emailService;
 		this.emailServiceOAuth = emailServiceOAuth;
 		this.customerService = customerService;
 		this.verificationService = verificationService;
-		this.securityConfig = securityConfig;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@GetMapping("/signup")
@@ -55,25 +53,24 @@ public class CustomerController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signup(@Valid @RequestBody SignupDTO customer) {
-		if (customerService.userExists(customer.getEmail())) {
+		if (customerService.userExists(customer.email())) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
 		}
 
 		// Encode password, create customer and log result.
-		customer.setPassword(securityConfig.passwordEncoder().encode(customer.getPassword()));
-		Customer createdCustomer = customerService.signup(customer);
+		Customer createdCustomer = customerService.signup(customer, passwordEncoder.encode(customer.password()));
 
 		logger.info("Customer created successfully as follows: " +
 						"Customer name = {}, Customer email = {}",
-				createdCustomer.getFirstName()+" "+createdCustomer.getLastName(), createdCustomer.getEmail());
+				createdCustomer.getFirstName() + " " + createdCustomer.getLastName(), createdCustomer.getEmail());
 
 		// Generate verification token and send email
-		String verificationToken = verificationService.createVerificationAndGetToken(customer.getEmail(), 10);
+		String verificationToken = verificationService.createVerificationAndGetToken(customer.email(), 10);
 		emailServiceOAuth.sendEmail(
 				new SimpleMailDTO(
 						createdCustomer.getEmail(),
 						"Confirm email address to complete EduInvest Registration",
-						"Hello " + customer.getFirstName()
+						"Hello " + customer.firstName()
 								+ ", kindly click on the link below to complete your EduInvest registration.\n"
 								+ "https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
 								+ verificationToken)
@@ -112,6 +109,21 @@ public class CustomerController {
 		//Create new child and assign gender.
 		//In customer service, do;
 		Child child = Child.builder().gender(gender).build();
+		return null;
+	}
+
+	@GetMapping("/update-child-details")
+	public ResponseEntity<ChildDetailsDTO> updateChild(){
+		return null;
+	}
+
+	@PostMapping("/update-child-details")
+	public ResponseEntity<GuardianDetailsDTO> updateChild(@RequestBody ChildDetailsDTO childDetailsDTO){
+		return null;
+	}
+
+	@PostMapping("/update-guardian-details")
+	public ResponseEntity<String> updateChild(@RequestBody GuardianDetailsDTO guardianDetailsDTO){
 		return null;
 	}
 

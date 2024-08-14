@@ -39,12 +39,16 @@ public abstract class Person {
 	private Gender gender;
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime dob;
+
 	@Embedded
 	private Address address;
+
 	@Column(nullable = false)
 	private String passwordHash;
+
 	@Column(nullable = false, unique = true)
 	private String phone;
+
 	@Email
 	@Column(nullable = false, unique = true)
 	private String email;

@@ -44,15 +44,15 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public Customer signup(SignupDTO customer) {
+	public Customer signup(SignupDTO customer, String encodedPassword) {
 		Customer newCustomer = Customer
 				.builder()
-				.firstName(customer.getFirstName())
-				.lastName(customer.getLastName())
-				.phone(customer.getPhone())
-				.email(customer.getEmail())
-				.passwordHash(customer.getPassword())
-				.referralCode(customer.getReferralCode())
+				.firstName(customer.firstName())
+				.lastName(customer.lastName())
+				.phone(customer.phone())
+				.email(customer.email())
+				.passwordHash(encodedPassword)
+				.referralCode(customer.referralCode())
 				.build();
 
 		customerRepository.save(newCustomer);

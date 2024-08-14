@@ -10,7 +10,7 @@ public interface CustomerService {
 
 	Customer getCustomerByEmail(String email);
 
-	Customer signup(SignupDTO customer);
+	Customer signup(SignupDTO customer, String encodedPassword);
 
 	ResponseEntity<String> verifyCustomerEmail(String vtoken);
 
