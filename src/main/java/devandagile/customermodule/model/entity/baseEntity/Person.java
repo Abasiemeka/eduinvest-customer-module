@@ -1,6 +1,7 @@
 package devandagile.customermodule.model.entity.baseEntity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -26,12 +27,24 @@ public abstract class Person {
 	@Column(nullable = false, updatable = true)
 	private boolean google2FAEnabled = false;
 
-	@Column(nullable = false)
+	@Column(nullable = false, updatable = false)
 	private String firstName;
+	@Column(nullable = false, updatable = false)
 	private String lastName;
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime dob;
+	@Email
+	@Column(nullable = false, unique = true)
 	private String email;
+	@Column(nullable = false, unique = true)
 	private String phone;
-	private String address;
+	@Column(nullable = false)
 	private String passwordHash;
+
+	@Embedded
+	private Address address;
+
+	public String getFullName() {
+		return this.firstName + " " + this.lastName;
+	}
 }
