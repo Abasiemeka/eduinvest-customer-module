@@ -1,16 +1,13 @@
 package devandagile.customermodule.model.entity;
 
-import devandagile.customermodule.enums.CustomerType;
+import devandagile.customermodule.model.enums.CustomerType;
 import devandagile.customermodule.model.entity.baseEntity.Person;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 
 @NoArgsConstructor
 @Entity
@@ -24,6 +21,7 @@ public class Customer extends Person {
 
 	@OneToMany
 	@JoinColumn(name = "investment_details", referencedColumnName = "id")
+	@Embedded
 	private HashSet<InvestmentDetails> investmentDetailsSet;
 
 	@OneToMany
@@ -33,4 +31,9 @@ public class Customer extends Person {
 	@OneToMany
 	@JoinColumn(name = "product-id", referencedColumnName = "id")
 	private HashSet<Product> productSet;
+
+	@OneToMany
+	@JoinColumn(name = "transaction_id", referencedColumnName = "id")
+	@Embedded
+	private HashSet<Transaction> transactionSet;
 }

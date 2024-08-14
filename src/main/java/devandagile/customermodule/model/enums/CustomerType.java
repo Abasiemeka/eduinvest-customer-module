@@ -1,4 +1,4 @@
-package devandagile.customermodule.enums;
+package devandagile.customermodule.model.enums;
 
 public enum CustomerType {
 	FATHER,

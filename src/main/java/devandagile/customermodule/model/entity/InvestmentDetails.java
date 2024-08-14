@@ -9,8 +9,10 @@ import lombok.*;
 @Setter
 @Entity
 @Builder
+@Embeddable
 public class InvestmentDetails {
 	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", nullable = false)
 	private Long id;
 

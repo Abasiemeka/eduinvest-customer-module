@@ -9,6 +9,7 @@ import devandagile.customermodule.service.EmailService;
 import devandagile.customermodule.service.EmailServiceOAuth;
 import devandagile.customermodule.service.VerificationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -78,19 +79,10 @@ public class CustomerController {
 		return ResponseEntity.status(HttpStatus.CREATED).body("Account created. Awaiting email verification.");
 	}
 
-//	@GetMapping("/verify-mail")
-//	public ResponseEntity<String> confirmEmail(@PathVariable("vtoken") String vtoken){
-//		customerService.verifyCustomerEmail(vtoken);
-//		//move the code below to the customer service confirmCustomerEmail method
-//
-//		if(tokenMail == null) {
-//			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email verification failed.");
-//		}
-//		else {
-//			customerService.getCustomerByEmail(tokenMail).set
-//		}
-//		return ResponseEntity.status(HttpStatus.CREATED).body("Account created.");
-//	}
+	@GetMapping("/verify-mail")
+	public ResponseEntity<String> confirmEmail(@PathVariable("vtoken") @NotNull String vtoken){
+		return customerService.verifyCustomerEmail(vtoken);
+	}
 
 //	@GetMapping("/{id}")
 //	public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {

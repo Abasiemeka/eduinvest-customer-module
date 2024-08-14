@@ -1,9 +1,8 @@
 package devandagile.customermodule.model.entity;
 
-import devandagile.customermodule.enums.ProductType;
+import devandagile.customermodule.model.enums.ProductType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.validation.beanvalidation.SpringConstraintValidatorFactory;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -30,6 +29,11 @@ public class Product {
 	@ManyToOne(targetEntity = Child.class, cascade = CascadeType.DETACH)
 	private Child child;
 
+	@Embedded
 	@OneToMany(mappedBy = "product")
 	private HashSet<InvestmentDetails> investmentDetailsSet;
+
+	@Embedded
+	@OneToOne
+	private Transaction transaction;
 }
