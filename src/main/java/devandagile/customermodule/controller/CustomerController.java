@@ -1,9 +1,12 @@
 package devandagile.customermodule.controller;
 
 import devandagile.customermodule.config.security.SecurityConfig;
+import devandagile.customermodule.model.dto.LoginDTO;
 import devandagile.customermodule.model.dto.SignupDTO;
 import devandagile.customermodule.model.dto.SimpleMailDTO;
+import devandagile.customermodule.model.entity.Child;
 import devandagile.customermodule.model.entity.Customer;
+import devandagile.customermodule.model.enums.Gender;
 import devandagile.customermodule.service.CustomerService;
 import devandagile.customermodule.service.EmailService;
 import devandagile.customermodule.service.EmailServiceOAuth;
@@ -84,6 +87,46 @@ public class CustomerController {
 		return customerService.verifyCustomerEmail(vtoken);
 	}
 
+	@GetMapping("/login")
+	public ResponseEntity<String> login() {
+		return null;
+	}
+
+	@PostMapping("/Login")
+	public ResponseEntity<Customer> login(@Validated @RequestBody LoginDTO loginDTO) {
+		return null;
+	}
+
+	@GetMapping("/forgot-password")
+	public ResponseEntity<String> forgotPassword() {
+		return null;
+	}
+
+	@GetMapping("/add-child")
+	public ResponseEntity<String> addChild() {
+		return null;
+	}
+
+	@PostMapping("/Select-gender")
+	public ResponseEntity<String> selectChildGender(@Validated @RequestAttribute Gender gender) {
+		//Create new child and assign gender.
+		//In customer service, do;
+		Child child = Child.builder().gender(gender).build();
+		return null;
+	}
+
+//	@PutMapping("/{id}")
+//	public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
+//		Customer updatedCustomer = customerService.updateCustomer(id, customer);
+//		if (updatedCustomer != null) {
+//			return ResponseEntity.ok(updatedCustomer);
+//		} else {
+//			return ResponseEntity.notFound().build();
+//		}
+//	}
+
+
+
 //	@GetMapping("/{id}")
 //	public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
 //		Customer customer = customerService.getCustomerById(id);
@@ -101,15 +144,7 @@ public class CustomerController {
 //		return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
 //	}
 //
-//	@PutMapping("/{id}")
-//	public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
-//		Customer updatedCustomer = customerService.updateCustomer(id, customer);
-//		if (updatedCustomer != null) {
-//			return ResponseEntity.ok(updatedCustomer);
-//		} else {
-//			return ResponseEntity.notFound().build();
-//		}
-//	}
+//
 //
 //	@DeleteMapping("/{id}")
 //	public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {

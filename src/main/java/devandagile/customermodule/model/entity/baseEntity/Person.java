@@ -1,5 +1,7 @@
 package devandagile.customermodule.model.entity.baseEntity;
 
+import devandagile.customermodule.model.enums.Gender;
+import devandagile.customermodule.model.enums.MethodFor2FA;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
@@ -20,29 +22,33 @@ public abstract class Person {
 	private Long id;
 
 	@Builder.Default
-	@Column(nullable = false, updatable = true)
+	@Column(nullable = false)
 	private boolean isEnabled = false;
 
 	@Builder.Default
-	@Column(nullable = false, updatable = true)
-	private boolean google2FAEnabled = false;
+	@Column(nullable = false)
+	private boolean enable2FA = false;
+
+	private MethodFor2FA methodFor2FA;
 
 	@Column(nullable = false, updatable = false)
 	private String firstName;
 	@Column(nullable = false, updatable = false)
 	private String lastName;
 	@Column(nullable = false, updatable = false)
+	private Gender gender;
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime dob;
+	@Embedded
+	private Address address;
+	@Column(nullable = false)
+	private String passwordHash;
+	@Column(nullable = false, unique = true)
+	private String phone;
 	@Email
 	@Column(nullable = false, unique = true)
 	private String email;
-	@Column(nullable = false, unique = true)
-	private String phone;
-	@Column(nullable = false)
-	private String passwordHash;
 
-	@Embedded
-	private Address address;
 
 	public String getFullName() {
 		return this.firstName + " " + this.lastName;
