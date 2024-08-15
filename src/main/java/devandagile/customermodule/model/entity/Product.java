@@ -2,10 +2,14 @@ package devandagile.customermodule.model.entity;
 
 import devandagile.customermodule.model.enums.ProductType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,7 +35,7 @@ public class Product {
 
 	@Embedded
 	@OneToMany(mappedBy = "product")
-	private HashSet<InvestmentDetails> investmentDetailsSet;
+	private Set<InvestmentDetails> investmentDetailsSet = new HashSet<>();
 
 	@Embedded
 	@OneToOne

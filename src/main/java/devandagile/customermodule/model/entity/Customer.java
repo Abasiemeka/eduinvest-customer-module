@@ -1,13 +1,19 @@
 package devandagile.customermodule.model.entity;
 
-import devandagile.customermodule.model.enums.CustomerType;
 import devandagile.customermodule.model.entity.baseEntity.Person;
-import jakarta.persistence.*;
-import lombok.*;
+import devandagile.customermodule.model.enums.CustomerType;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Set;
 
 @NoArgsConstructor
 @Entity
@@ -22,18 +28,18 @@ public class Customer extends Person {
 	@OneToMany
 	@JoinColumn(name = "investment_details", referencedColumnName = "id")
 	@Embedded
-	private HashSet<InvestmentDetails> investmentDetailsSet;
+	private Set<InvestmentDetails> investmentDetailsSet = new HashSet<>();
 
 	@OneToMany
 	@JoinColumn(name = "child_id", referencedColumnName = "id")
-	private HashSet<Child> childSet;
+	private Set<Child> childSet = new HashSet<>();
 
 	@OneToMany
 	@JoinColumn(name = "product-id", referencedColumnName = "id")
-	private HashSet<Product> productSet;
+	private Set<Product> productSet = new HashSet<>();
 
 	@OneToMany
 	@JoinColumn(name = "transaction_id", referencedColumnName = "id")
 	@Embedded
-	private HashSet<Transaction> transactionSet;
+	private Set<Transaction> transactionSet = new HashSet<>();
 }

@@ -35,9 +35,9 @@ public abstract class Person {
 	private String firstName;
 	@Column(nullable = false, updatable = false)
 	private String lastName;
-	@Column(nullable = false, updatable = false)
+	@Column(nullable = true, updatable = false)
 	private Gender gender;
-	@Column(nullable = false, updatable = false)
+	@Column(nullable = true, updatable = false)
 	private LocalDateTime dob;
 
 	@Embedded

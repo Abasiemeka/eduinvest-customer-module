@@ -80,7 +80,7 @@ public class CustomerController {
 	}
 
 	@GetMapping("/verify-mail")
-	public ResponseEntity<String> confirmEmail(@PathVariable("vtoken") @NotNull String vtoken){
+	public ResponseEntity<String> confirmEmail(@RequestParam("vtoken") @NotNull String vtoken){
 		return customerService.verifyCustomerEmail(vtoken);
 	}
 
@@ -89,7 +89,7 @@ public class CustomerController {
 		return null;
 	}
 
-	@PostMapping("/Login")
+	@PostMapping("/login")
 	public ResponseEntity<Customer> login(@Validated @RequestBody LoginDTO loginDTO) {
 		return null;
 	}
@@ -99,12 +99,12 @@ public class CustomerController {
 		return null;
 	}
 
-	@GetMapping("/add-child")
+	@GetMapping("/{id}/add-child")
 	public ResponseEntity<String> addChild() {
 		return null;
 	}
 
-	@PostMapping("/Select-gender")
+	@PostMapping("/{id}/Select-gender")
 	public ResponseEntity<String> selectChildGender(@Validated @RequestAttribute Gender gender) {
 		//Create new child and assign gender.
 		//In customer service, do;
@@ -112,17 +112,17 @@ public class CustomerController {
 		return null;
 	}
 
-	@GetMapping("/update-child-details")
+	@GetMapping("/{id}/update-child-details")
 	public ResponseEntity<ChildDetailsDTO> updateChild(){
 		return null;
 	}
 
-	@PostMapping("/update-child-details")
+	@PostMapping("/{id}/update-child-details")
 	public ResponseEntity<GuardianDetailsDTO> updateChild(@RequestBody ChildDetailsDTO childDetailsDTO){
 		return null;
 	}
 
-	@PostMapping("/update-guardian-details")
+	@PostMapping("/{id}/update-guardian-details")
 	public ResponseEntity<String> updateChild(@RequestBody GuardianDetailsDTO guardianDetailsDTO){
 		return null;
 	}

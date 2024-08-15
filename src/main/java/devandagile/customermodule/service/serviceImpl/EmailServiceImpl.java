@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +16,7 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
 	private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
-	private final JavaMailSender javaMailSender;
-
-	public EmailServiceImpl(JavaMailSender javaMailSender) {
-		this.javaMailSender = javaMailSender;
-	}
+	private final JavaMailSender javaMailSender = new JavaMailSenderImpl();
 
 	@Override
 	@Async
