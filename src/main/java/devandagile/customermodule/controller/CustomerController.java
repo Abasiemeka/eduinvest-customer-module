@@ -1,6 +1,5 @@
 package devandagile.customermodule.controller;
 
-import devandagile.customermodule.config.security.PasswordEncoder;
 import devandagile.customermodule.model.dto.*;
 import devandagile.customermodule.model.entity.Child;
 import devandagile.customermodule.model.entity.Customer;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,7 +53,7 @@ public class CustomerController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signup(@Valid @RequestBody SignupDTO customer) {
-		if (customerService.userExists(customer.email())) {
+		if (customerService.customerExists(customer.email())) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
 		}
 

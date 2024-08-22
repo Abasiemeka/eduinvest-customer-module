@@ -1,11 +1,12 @@
 package devandagile.customermodule.service.serviceImpl;
 
+import devandagile.customermodule.config.exception.Exceptions.UserNotFoundException;
 import devandagile.customermodule.model.dto.SignupDTO;
 import devandagile.customermodule.model.dto.SimpleMailDTO;
 import devandagile.customermodule.model.entity.Customer;
 import devandagile.customermodule.model.entity.Verification;
-import devandagile.customermodule.repository.VerificationRepository;
 import devandagile.customermodule.repository.CustomerRepository;
+import devandagile.customermodule.repository.VerificationRepository;
 import devandagile.customermodule.service.CustomerService;
 import devandagile.customermodule.service.EmailServiceOAuth;
 import lombok.SneakyThrows;
@@ -34,12 +35,13 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public Customer getCustomerById(Long id) {
-		return null;
+	public Customer getCustomerById(Long id) throws UserNotFoundException {
+		return customerRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("No such customer."));
 	}
 
 	@Override
-	public Customer getCustomerByEmail(String email) {
+	public Customer getCustomerByEmailOrNull(String email) {
 		return customerRepository.findCustomerByEmailIgnoreCase(email).orElse(null);
 	}
 
@@ -51,7 +53,7 @@ public class CustomerServiceImpl implements CustomerService {
 				.lastName(customer.lastName())
 				.phone(customer.phone())
 				.email(customer.email())
-				.passwordHash(encodedPassword)
+				.password(encodedPassword)
 				.referralCode(customer.referralCode())
 				.build();
 
@@ -102,7 +104,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public boolean userExists(String email) {
-		return getCustomerByEmail(email) != null;
+	public boolean customerExists(String email) {
+		return getCustomerByEmailOrNull(email) != null;
 	}
 }

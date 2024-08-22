@@ -20,6 +20,7 @@ public class CustomerModuleApplication {
 		System.setProperty("DATASOURCE_PASSWORD", dotenv.get("DATASOURCE_PASSWORD"));
 
 		System.setProperty("PAYSTACK_SECRET_KEY", dotenv.get("PAYSTACK_SECRET_KEY"));
+		System.setProperty("PAYSTACK_PUBLIC_KEY", dotenv.get("PAYSTACK_PUBLIC_KEY"));
 
 		SpringApplication.run(CustomerModuleApplication.class, args);
 	}

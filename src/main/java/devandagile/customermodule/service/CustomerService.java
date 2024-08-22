@@ -8,11 +8,11 @@ public interface CustomerService {
 
 	Customer getCustomerById(Long id);
 
-	Customer getCustomerByEmail(String email);
+	Customer getCustomerByEmailOrNull(String email);
 
 	Customer signup(SignupDTO customer, String encodedPassword);
 
 	ResponseEntity<String> verifyCustomerEmail(String vtoken);
 
-	boolean userExists(String email);
+	boolean customerExists(String email);
 }

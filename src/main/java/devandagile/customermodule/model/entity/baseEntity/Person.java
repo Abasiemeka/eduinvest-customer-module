@@ -44,7 +44,7 @@ public abstract class Person {
 	private Address address;
 
 	@Column(nullable = false)
-	private String passwordHash;
+	private String password;
 
 	@Column(nullable = false, unique = true)
 	private String phone;

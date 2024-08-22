@@ -22,4 +22,9 @@ public class PaystackConfig {
 			this.paystackSecretKey = secretKey;
 		}
 	}
+
+	public boolean verifySignature(String payload, String signature) {
+		//fixme: Implement
+		return true;
+	}
 }

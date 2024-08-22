@@ -1,7 +1,14 @@
 package devandagile.customermodule.service;
 
-public interface PaystackService {
-	String initializePayment(Object paymentRequest);
+import devandagile.customermodule.model.dto.PaystackPaymentRequestDTO;
 
-	String verifyPayment(String reference);
+public interface PaystackService {
+
+	void processWebhookEvent(String payload);
+
+	String initializePayment(PaystackPaymentRequestDTO paymentRequest);
+
+	boolean verifyPayment(String reference);
+
+	boolean verifyWebhookSignature(String payload, String signature);
 }
