@@ -2,6 +2,7 @@ package devandagile.customermodule.service.serviceImpl;
 
 import devandagile.customermodule.config.exception.Exceptions.EmailSendingException;
 import devandagile.customermodule.model.dto.SimpleMailDTO;
+import devandagile.customermodule.model.dto.VerificationMailDTO;
 import devandagile.customermodule.service.EmailServiceOAuth;
 import devandagile.customermodule.service.OAuth2TokenService;
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +62,18 @@ public class EmailServiceOAuthImpl implements EmailServiceOAuth {
 		}
 	}
 
+	@Override
+	public void sendSimpleVerificationEMail(VerificationMailDTO verificationMailDTO) {
+		sendEmail(new SimpleMailDTO(
+				verificationMailDTO.email(),
+				"Confirm email address to complete EduInvest Registration",
+				"Hello " + verificationMailDTO.firstName()
+						+ ", kindly click on the link below to complete your EduInvest registration.\n"
+						+ "https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
+						+ verificationMailDTO.verificationToken()
+		));
+	}
+
 	@NotNull
 	private static MimeMessagePreparator getMimeMessagePreparator(SimpleMailDTO simpleMailDTO, OAuth2AuthorizedClient authorizedClient) {
 
@@ -69,7 +82,7 @@ public class EmailServiceOAuthImpl implements EmailServiceOAuth {
 		return mimeMessage -> {
 			MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 			messageHelper.setFrom("abasiemeka@gmail.com");
-			messageHelper.setTo(simpleMailDTO.to());
+			messageHelper.setTo(String.valueOf(simpleMailDTO.to()));
 			messageHelper.setSubject(simpleMailDTO.subject());
 			messageHelper.setText(simpleMailDTO.text());
 

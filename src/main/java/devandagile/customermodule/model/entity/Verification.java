@@ -25,15 +25,14 @@ public class Verification {
 	@NotBlank
 	@NotNull
 	@Column(unique = true, nullable = false, updatable = false)
-	@Email
-	private String email;
+	private Email email;
 
 	@Column(nullable = false, unique = true)
 	private String token;
 	private LocalDateTime expiresAt;
 	private Integer validityDuration;
 
-	public Verification(String email, Integer validityDuration) {
+	public Verification(Email email, Integer validityDuration) {
 		this.email = email;
 		this.validityDuration = validityDuration;
 		this.token = UUID.randomUUID().toString();

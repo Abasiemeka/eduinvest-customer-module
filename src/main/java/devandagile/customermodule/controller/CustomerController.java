@@ -10,8 +10,6 @@ import devandagile.customermodule.service.EmailServiceOAuth;
 import devandagile.customermodule.service.VerificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/customer")
 @Validated
 public class CustomerController {
-
-	private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
 	private final Environment env;
 	private final EmailService emailService;
@@ -53,30 +49,8 @@ public class CustomerController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> signup(@Valid @RequestBody SignupDTO customer) {
-		if (customerService.customerExists(customer.email())) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
-		}
-
-		// Encode password, create customer and log result.
-		Customer createdCustomer = customerService.signup(customer, passwordEncoder.encode(customer.password()));
-
-		logger.info("Customer created successfully as follows: " +
-						"Customer name = {}, Customer email = {}",
-				createdCustomer.getFirstName() + " " + createdCustomer.getLastName(), createdCustomer.getEmail());
-
-		// Generate verification token and send email
-		String verificationToken = verificationService.createVerificationAndGetToken(customer.email(), 10);
-		emailServiceOAuth.sendEmail(
-				new SimpleMailDTO(
-						createdCustomer.getEmail(),
-						"Confirm email address to complete EduInvest Registration",
-						"Hello " + customer.firstName()
-								+ ", kindly click on the link below to complete your EduInvest registration.\n"
-								+ "https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
-								+ verificationToken)
-		);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body("Account created. Awaiting email verification.");
+		// Encode password, create customer send verification email.
+		return customerService.signup(customer, passwordEncoder.encode(customer.password()));
 	}
 
 	@GetMapping("/verify-mail")
@@ -86,7 +60,7 @@ public class CustomerController {
 
 	@GetMapping("/login")
 	public ResponseEntity<String> login() {
-		return null;
+		return ResponseEntity.status(HttpStatus.OK).body("Please login to continue.");
 	}
 
 	@PostMapping("/login")

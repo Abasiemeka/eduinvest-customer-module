@@ -21,6 +21,9 @@ public class CustomerModuleApplication {
 
 		System.setProperty("PAYSTACK_SECRET_KEY", dotenv.get("PAYSTACK_SECRET_KEY"));
 		System.setProperty("PAYSTACK_PUBLIC_KEY", dotenv.get("PAYSTACK_PUBLIC_KEY"));
+		System.setProperty("PAYSTACK_INITIALIZE_URL", dotenv.get("PAYSTACK_INITIALIZE_URL"));
+		System.setProperty("PAYSTACK_VERIFY_URL", dotenv.get("PAYSTACK_VERIFY_URL"));
+		System.setProperty("PAYSTACK_BASE_URL", dotenv.get("PAYSTACK_BASE_URL"));
 
 		SpringApplication.run(CustomerModuleApplication.class, args);
 	}

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @SuperBuilder
@@ -17,7 +16,7 @@ import java.util.Set;
 @Entity
 public class Child extends Person {
 	@OneToMany(mappedBy = "child")
-	private Set<InvestmentDetails> investmentDetailsSet = new HashSet<>();
+	private Set<InvestmentDetails> investmentDetailsSet;
 
 	@ManyToOne(
 			targetEntity = Customer.class,
@@ -27,6 +26,6 @@ public class Child extends Person {
 
 	@OneToMany
 	@JoinColumn(name = "product_id", referencedColumnName = "id")
-	private Set<Product> productSet = new HashSet<>();
+	private Set<Product> productSet;
 
 }

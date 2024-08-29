@@ -1,0 +1,913 @@
+package devandagile.customermodule.model.entity;
+
+import devandagile.customermodule.model.enums.ProductType;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Entity
+public class Product {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@Column(name = "id", nullable = false)
+	private Long id;
+
+	private Long cost;
+	private ProductType productType;
+	private Integer productDuration;
+	private LocalDate purchaseDate;
+
+	@ManyToOne(targetEntity = Customer.class, cascade = CascadeType.DETACH)
+	private Customer customer;
+
+	@ManyToOne(targetEntity = Child.class, cascade = CascadeType.DETACH)
+	private Child child;
+
+	@Embedded
+	@OneToMany(mappedBy = "product")
+	private Set<InvestmentDetails> investmentDetailsSet = new HashSet<>();
+
+	@Embedded
+	@OneToOne
+	private Transaction transaction;
+}
+
+
+package devandagile.customermodule.model.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Entity
+@Builder
+@Embeddable
+public class InvestmentDetails {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name = "id", nullable = false)
+	private Long id;
+
+	@ManyToOne(targetEntity = Customer.class, cascade = CascadeType.DETACH)
+	private Customer customer;
+
+	@ManyToOne(targetEntity = Child.class, cascade = CascadeType.DETACH)
+	private Child child;
+
+	@ManyToOne(targetEntity = Product.class, cascade = CascadeType.DETACH)
+	private Product product;
+}
+
+
+
+package devandagile.customermodule.model.entity;
+
+import devandagile.customermodule.model.entity.baseEntity.Person;
+import devandagile.customermodule.model.enums.CustomerType;
+import devandagile.customermodule.model.enums.Roles;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@NoArgsConstructor
+@Entity
+@Getter
+@Setter
+@SuperBuilder
+public class Customer extends Person {
+	private String referralCode;
+	private CustomerType relationship;
+	private LocalDate registrationDate;
+
+	@NotNull
+	private Roles roles;
+
+	@OneToMany
+	@JoinColumn(name = "investment_details", referencedColumnName = "id")
+	@Embedded
+	private Set<InvestmentDetails> investmentDetailsSet = new HashSet<>();
+
+	@OneToMany
+	@JoinColumn(name = "child_id", referencedColumnName = "id")
+	private Set<Child> childSet = new HashSet<>();
+
+	@OneToMany
+	@JoinColumn(name = "product-id", referencedColumnName = "id")
+	private Set<Product> productSet = new HashSet<>();
+
+	@OneToMany
+	@JoinColumn(name = "transaction_id", referencedColumnName = "id")
+	@Embedded
+	private Set<Transaction> transactionSet = new HashSet<>();
+}
+
+
+
+package devandagile.customermodule.model.entity;
+
+import devandagile.customermodule.model.entity.baseEntity.Person;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@SuperBuilder
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+public class Child extends Person {
+	@OneToMany(mappedBy = "child")
+	private Set<InvestmentDetails> investmentDetailsSet = new HashSet<>();
+
+	@ManyToOne(
+			targetEntity = Customer.class,
+			cascade = CascadeType.DETACH,
+			fetch = FetchType.LAZY)
+	private Customer customer;
+
+	@OneToMany
+	@JoinColumn(name = "product_id", referencedColumnName = "id")
+	private Set<Product> productSet = new HashSet<>();
+
+}
+
+
+package devandagile.customermodule.model.entity;
+
+public class BankDetails {
+	private class BankAccountDetails{}
+	private class CreditCardDetails{}
+}
+
+
+
+package devandagile.customermodule.model.dto;
+
+import lombok.Builder;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+@Builder
+public record SimpleMailDTO(
+				String to,
+				String subject,
+				String text
+				) {
+}
+
+
+package devandagile.customermodule.model.dto;
+
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+@Builder
+public record SignupDTO (
+				@NotBlank(message = "First Name is required")
+				String firstName,
+
+				@NotBlank(message = "Last Name is required")
+				String lastName,
+
+				@NotBlank(message = "Phone number is required")
+				String phone,
+
+				@Getter
+				@Size(max = 100)
+				@NotBlank(message = "Email Name is required")
+				@Email(message = "A valid email is required")
+				@Column(unique = true)
+				String email,
+
+				@NotNull
+				@Setter
+				@NotBlank(message = "Password Name is required")
+				@Size(max = 20, message = "Password must be less than or equal to 20 characters")
+				@Size(min = 8, message = "Password must be more than or equal to 8 characters")
+				@Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()-+=]).{8,}$", message = "Password must contain at least 8 characters, one digit, one lowercase letter, one uppercase letter, and one special character")
+				String password,
+
+				String referralCode
+				) {
+}
+
+
+
+package devandagile.customermodule.model.dto;
+
+import lombok.Builder;
+import org.springframework.validation.annotation.Validated;
+
+@Builder
+@Validated
+public record PaystackPaymentRequestDTO(String email,
+                                        int amount) {}
+
+
+package devandagile.customermodule.model.dto;
+
+import jakarta.validation.constraints.*;
+import lombok.Builder;
+import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+@Builder
+public record LoginDTO (
+				@NotBlank(message = "Provide username or email to login.")
+				String UsernameOrEmail,
+
+				@NotNull
+				@Setter
+				@NotBlank(message = "Password Name is required")
+				@Size(max = 20, message = "Password must be less than or equal to 20 characters")
+				@Size(min = 8, message = "Password must be more than or equal to 8 characters")
+				@Pattern(regexp = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()-+=]).{8,}$", message = "Password must contain at least 8 characters, one digit, one lowercase letter, one uppercase letter, and one special character")
+				String password
+				) {
+}
+package devandagile.customermodule.model.dto;
+
+import devandagile.customermodule.model.entity.baseEntity.Address;
+import devandagile.customermodule.model.enums.CustomerType;
+import org.springframework.validation.annotation.Validated;
+import java.time.LocalDateTime;
+import jakarta.persistence.*;
+import lombok.Builder;
+
+@Validated
+@Builder
+public record GuardianDetailsDTO(
+				@Column(nullable = false, updatable = false)
+				String firstName,
+
+				@Column(nullable = false, updatable = false)
+				String lastName,
+
+				@Column(nullable = false, updatable = false)
+				LocalDateTime dob,
+
+				@Column(nullable = false, unique = true)
+				String phone,
+
+				@Embedded
+				@Column(nullable = false, updatable = false)
+				Address address,
+
+				@Column(nullable = false)
+				CustomerType relationship
+				) {
+}
+
+
+
+package devandagile.customermodule.model.dto;
+
+import devandagile.customermodule.model.entity.baseEntity.Address;
+import devandagile.customermodule.model.enums.Gender;
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.LocalDateTime;
+
+@Builder
+@Validated
+public record ChildDetailsDTO(
+				@Column(nullable = false, updatable = false)
+				String firstName,
+				@Column(nullable = false, updatable = false)
+				String lastName,
+				@Column(nullable = false, updatable = false)
+				Gender gender,
+				@Column(nullable = false, updatable = false)
+				LocalDateTime dob,
+
+				@AttributeOverride(name = "houseNumber", column = @Column(name = "number"))
+				@AttributeOverride(name = "street", column = @Column(name = "street/road"))
+				@AttributeOverride(name = "landmark", column = @Column(name = "zip"))
+				Address SchoolAddress
+				) {
+}
+
+
+package devandagile.customermodule.model.dto;
+
+public record BankDetailsDTO(
+				String bank,
+				String accountName,
+				String accountNumber
+				) {
+}
+
+
+package devandagile.customermodule.model.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
+import lombok.Getter;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.LocalDate;
+
+@Validated
+@Builder
+public record AgentCustomerDTO(
+				@NotBlank Long id,
+				@NotBlank String name,
+				@NotBlank @Email String email,
+				@NotBlank LocalDate registrationDate
+				) {
+}
+
+
+package devandagile.customermodule.controller;
+
+public class TwoFactorAuthController {
+}
+
+
+package devandagile.customermodule.controller;
+
+import devandagile.customermodule.model.dto.PaystackPaymentRequestDTO;
+import devandagile.customermodule.service.PaystackService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/paystack")
+public class PaymentController {
+
+	private final PaystackService paystackService;
+
+	@Autowired
+	public PaymentController(PaystackService paystackService) {
+		this.paystackService = paystackService;
+	}
+
+	@PostMapping("/initialize")
+	public ResponseEntity<String> initializePayment(@RequestParam String email, int amount) {
+		PaystackPaymentRequestDTO paymentRequestInKobo = PaystackPaymentRequestDTO
+				.builder()
+				.email(email)
+				.amount(amount * 100)   //Converts amount to Kobo as Paystack expects
+				.build();
+		String response = paystackService.initializePayment(paymentRequestInKobo);
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/verify")
+	public ResponseEntity<Boolean> verifyPayment(@RequestParam String reference) {
+		boolean response = paystackService.verifyPayment(reference);
+		return ResponseEntity.ok(response);
+	}
+
+	// Handle Paystack payment callback
+	@GetMapping("/callback")
+	public ResponseEntity<String> handleCallback(@RequestParam("reference") String reference) {
+		boolean isPaymentSuccessful = paystackService.verifyPayment(reference);
+
+		if (isPaymentSuccessful) {
+			return ResponseEntity.ok("Payment successful! Reference: " + reference);
+		} else {
+			return ResponseEntity.badRequest().body("Payment verification failed.");
+		}
+	}
+
+	// Handle Paystack Webhook events
+	@PostMapping("/webhook")
+	public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("x-paystack-signature") String signature) {
+		if (!paystackService.verifyWebhookSignature(payload, signature)) {
+			return ResponseEntity.status(401).body("Invalid signature");
+		}
+
+		paystackService.processWebhookEvent(payload);
+		return ResponseEntity.ok("Webhook event processed successfully");
+	}
+}
+
+package devandagile.customermodule.controller;
+
+import devandagile.customermodule.model.dto.*;
+import devandagile.customermodule.model.entity.Child;
+import devandagile.customermodule.model.entity.Customer;
+import devandagile.customermodule.model.enums.Gender;
+import devandagile.customermodule.service.CustomerService;
+import devandagile.customermodule.service.EmailService;
+import devandagile.customermodule.service.EmailServiceOAuth;
+import devandagile.customermodule.service.VerificationService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/v1/customer")
+@Validated
+public class CustomerController {
+
+	private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
+
+	private final Environment env;
+	private final EmailService emailService;
+	private final EmailServiceOAuth emailServiceOAuth;
+	private final CustomerService customerService;
+	private final VerificationService verificationService;
+	private final PasswordEncoder passwordEncoder;
+
+	public CustomerController(Environment env,
+	                          EmailService emailService, EmailServiceOAuth emailServiceOAuth,
+	                          CustomerService customerService,
+	                          VerificationService verificationService,
+	                          PasswordEncoder passwordEncoder) {
+		this.env = env;
+		this.emailService = emailService;
+		this.emailServiceOAuth = emailServiceOAuth;
+		this.customerService = customerService;
+		this.verificationService = verificationService;
+		this.passwordEncoder = passwordEncoder;
+	}
+
+	@GetMapping("/signup")
+	public ResponseEntity<String> signup() {
+		return ResponseEntity.status(HttpStatus.FOUND).body("Welcome to EduInvest Signup Page");
+	}
+
+	@PostMapping("/signup")
+	public ResponseEntity<String> signup(@Valid @RequestBody SignupDTO customer) {
+		if (customerService.customerExists(customer.email())) {
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
+		}
+
+		// Encode password, create customer and log result.
+		Customer createdCustomer = customerService.signup(customer, passwordEncoder.encode(customer.password()));
+
+		logger.info("Customer created successfully as follows: " +
+						"Customer name = {}, Customer email = {}",
+				createdCustomer.getFirstName() + " " + createdCustomer.getLastName(), createdCustomer.getEmail());
+
+		// Generate verification token and send email
+		String verificationToken = verificationService.createVerificationAndGetToken(customer.email(), 10);
+		emailServiceOAuth.sendEmail(
+				new SimpleMailDTO(
+						createdCustomer.getEmail(),
+						"Confirm email address to complete EduInvest Registration",
+						"Hello " + customer.firstName()
+								+ ", kindly click on the link below to complete your EduInvest registration.\n"
+								+ "https://127.0.0.1:7075/v1/customer/verify-mail?vtoken="
+								+ verificationToken)
+		);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body("Account created. Awaiting email verification.");
+	}
+
+	@GetMapping("/verify-mail")
+	public ResponseEntity<String> confirmEmail(@RequestParam("vtoken") @NotNull String vtoken){
+		return customerService.verifyCustomerEmail(vtoken);
+	}
+
+	@GetMapping("/login")
+	public ResponseEntity<String> login() {
+		return ResponseEntity.status(HttpStatus.OK).body("Please login to continue.");
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<Customer> login(@Validated @RequestBody LoginDTO loginDTO) {
+		return null;
+	}
+
+	@GetMapping("/forgot-password")
+	public ResponseEntity<String> forgotPassword() {
+		return null;
+	}
+
+	@GetMapping("/{id}/add-child")
+	public ResponseEntity<String> addChild() {
+		return null;
+	}
+
+	@PostMapping("/{id}/Select-gender")
+	public ResponseEntity<String> selectChildGender(@Validated @RequestAttribute Gender gender) {
+		//Create new child and assign gender.
+		//In customer service, do;
+		Child child = Child.builder().gender(gender).build();
+		return null;
+	}
+
+	@GetMapping("/{id}/update-child-details")
+	public ResponseEntity<ChildDetailsDTO> updateChild(){
+		return null;
+	}
+
+	@PostMapping("/{id}/update-child-details")
+	public ResponseEntity<GuardianDetailsDTO> updateChild(@RequestBody ChildDetailsDTO childDetailsDTO){
+		return null;
+	}
+
+	@PostMapping("/{id}/update-guardian-details")
+	public ResponseEntity<String> updateChild(@RequestBody GuardianDetailsDTO guardianDetailsDTO){
+		return null;
+	}
+
+//	@PutMapping("/{id}")
+//	public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
+//		Customer updatedCustomer = customerService.updateCustomer(id, customer);
+//		if (updatedCustomer != null) {
+//			return ResponseEntity.ok(updatedCustomer);
+//		} else {
+//			return ResponseEntity.notFound().build();
+//		}
+//	}
+
+
+
+//	@GetMapping("/{id}")
+//	public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+//		Customer customer = customerService.getCustomerById(id);
+//		if (customer != null) {
+//			return ResponseEntity.ok(customer);
+//		} else {
+//			return ResponseEntity.notFound().build();
+//		}
+//	}
+//
+//	@PostMapping("/signup")
+//	public ResponseEntity<Customer> signupe(@RequestBody SignupDTO customer) {
+//		customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+//		Customer createdCustomer = customerService.signup(customer);
+//		return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
+//	}
+//
+//
+//
+//	@DeleteMapping("/{id}")
+//	public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+//		boolean isDeleted = customerService.deleteCustomer(id);
+//		if (isDeleted) {
+//			return ResponseEntity.noContent().build();
+//		} else {
+//			return ResponseEntity.notFound().build();
+//		}
+//	}
+
+}
+
+
+
+package devandagile.customermodule.config.security;
+
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class TwoFactorAuthConfig {
+}
+
+
+
+package devandagile.customermodule.config.security;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+}
+
+
+package devandagile.customermodule.config.exception;
+
+import java.io.IOException;
+
+public class Exceptions extends Exception{
+	/**
+	 * Exception thrown when email sending attempt fails.
+	 * This exception indicates that the email was not successfully sent.
+	 */
+	public static class EmailSendingException extends RuntimeException {
+		public EmailSendingException(String message) {
+			super(message);
+		}
+
+		public EmailSendingException(String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
+
+	/**
+	 * Exception thrown when a user validation attempt fails.
+	 * This exception indicates that the user information provided does not match the information in the DB.
+	 */
+	public static class UserValidationException extends RuntimeException{
+		public UserValidationException(String s){ super("User details provided are not valid.");}
+	}
+
+	/**
+	 * Exception thrown when a user attempts to access a feature they are not authorized for in MockBook.
+	 * This exception indicates that the user does not have the necessary permissions to perform the requested action.
+	 */
+	public static class UnauthorizedAccessException extends RuntimeException {
+
+		/**
+		 * Constructs a new UnauthorizedAccessException with a default error message.
+		 */
+		public UnauthorizedAccessException(String s) {
+			super("User is not authorized to access this feature.");
+		}
+	}
+
+	/**
+	 * Exception thrown when a requested User is not found or does not exist in MockBook.
+	 * This exception indicates that the requested User does not exist in the scope of the specified fetch location.
+	 * It can also mean that the user does not exist at all, in the application.
+	 */
+	public static class UserNotFoundException extends RuntimeException{
+
+		/**
+		 * Constructs a new UserNotFoundException with a default error message.
+		 */
+		public UserNotFoundException(String s) {
+			super("The requested user was not found or does not exist.");
+		}
+	}
+
+	/**
+	 * Exception thrown when a requested User is not found or does not exist in MockBook.
+	 * This exception indicates that the requested User does not exist in the scope of the specified fetch location.
+	 * It can also mean that the user does not exist at all, in the application.
+	 */
+	public static class UserAlreadyExistsException extends RuntimeException{
+
+		/**
+		 * Constructs a new UserNotFoundException with a default error message.
+		 */
+		public UserAlreadyExistsException(String s) {
+			super("This user already exists: " + s);
+		}
+	}
+
+	/**
+	 * Exception thrown when the requested profile picture resource is not found or does not exist in the database.
+	 * This exception indicates that the requested User does not exist in the scope of the specified fetch location.
+	 */
+	public static class ProfilePicException extends IOException {
+
+		/**
+		 * Constructs a new ProfilePicException with a default error message.
+		 */
+		public ProfilePicException(String s) {
+			super("Profile Pic could not be saved: " + s);
+		}
+	}
+
+	/**
+	 * Exception thrown when the requested profile picture resource is not found or does not exist in the database.
+	 * This exception indicates that the requested User does not exist in the scope of the specified fetch location.
+	 */
+	public static class AuthenticationException extends RuntimeException {
+		public AuthenticationException(String s) { super("User could not be authenticated.");}
+	}
+
+	/**
+	 * Exception thrown when the requested resource is not found or does not exist.
+	 * This exception indicates that the requested resource does not exist in the scope of the specified fetch location.
+	 */
+	public static class ResourceNotFoundException extends RuntimeException {
+		public ResourceNotFoundException(String s) { super("The requested resource cannot be found.");}
+	}
+
+	public static class UnauthorizedActionException extends RuntimeException {
+		public UnauthorizedActionException(String s) { super("Action not authorized!");
+		}
+	}
+}
+
+
+package devandagile.customermodule.config.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import devandagile.customermodule.config.exception.Exceptions.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Arrays;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<String> handleGenericException(Exception ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body("An internal server error occurred: " + ex.getMessage());
+	}
+
+	@ExceptionHandler(EmailSendingException.class)
+	public ResponseEntity<String> handleEmailSendingException(EmailSendingException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body("Failed to send the email: " + ex.getMessage() + " " + ex.getCause() + " ALSO " + Arrays.toString(ex.getStackTrace()));
+	}
+
+	// Add other specific exception handlers as needed
+}
+
+
+package devandagile.customermodule.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class RestTemplateConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+
+
+package devandagile.customermodule.config;
+
+import io.github.cdimascio.dotenv.Dotenv;
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PaystackConfig {
+
+	private final Dotenv dotenv = Dotenv.load();
+
+	@Getter
+	@Value("${paystack.secret.key}")
+	private String paystackSecretKey;
+
+	@PostConstruct
+	public void init() {
+		String secretKey = dotenv.get("PAYSTACK_SECRET_KEY");
+		if (secretKey != null) {
+			this.paystackSecretKey = secretKey;
+		}
+	}
+
+	public boolean verifySignature(String payload, String signature) {
+		//fixme: Implement
+		return true;
+	}
+}
+
+
+
+package devandagile.customermodule.config;
+
+import devandagile.customermodule.service.OAuth2TokenService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
+
+import java.util.Properties;
+
+@Configuration
+public class MailConfig {
+
+	@Bean
+	public JavaMailSender javaMailSender() {
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+
+		// Configure the mail server
+		mailSender.setHost("smtp.example.com"); // replace with your SMTP server
+		mailSender.setPort(587); // replace with your SMTP port
+
+		// Set additional properties
+		Properties props = mailSender.getJavaMailProperties();
+		props.put("mail.transport.protocol", "smtp");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true"); // Use TLS
+		props.put("mail.debug", "true"); // Enable debug output
+
+		return mailSender;
+	}
+
+	@Bean
+	public OAuth2TokenService oAuth2TokenService(OAuth2AuthorizedClientService authorizedClientService) {
+		return new OAuth2TokenService(authorizedClientService) {
+			@Override
+			public String getAccessToken(OAuth2AuthorizedClient authorizedClient) {
+				if (authorizedClient == null) {
+					throw new IllegalStateException("OAuth2AuthorizedClient is null");
+				}
+				if (authorizedClient.getAccessToken() == null) {
+					throw new IllegalStateException("AccessToken is null");
+				}
+				return authorizedClient.getAccessToken().getTokenValue();
+			}
+		};
+	}
+
+	@Bean
+	public ClientRegistrationRepository clientRegistrationRepository() {
+		ClientRegistration googleClientRegistration = ClientRegistration
+				.withRegistrationId("google")
+				.clientId("428517625913-c5mvsjiqr0esdegu6dfrjla9calrq5dq.apps.googleusercontent.com")
+				.clientSecret("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")
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.redirectUri("http://localhost:7075/login/oauth2/code/{registrationId}")
+				.scope("email", "profile")
+				.authorizationUri("https://accounts.google.com/o/oauth2/auth")
+				.tokenUri("https://oauth2.googleapis.com/token")
+				.userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+				.userNameAttributeName(IdTokenClaimNames.SUB)
+				.clientName("Google")
+				.build();
+
+		return new InMemoryClientRegistrationRepository(googleClientRegistration);
+	}
+}
+
+
+package devandagile.customermodule;
+
+import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class CustomerModuleApplication {
+
+	public static void main(String[] args) {
+		Dotenv dotenv = Dotenv.load();
+
+		System.setProperty("SERVER_FULL_URL", dotenv.get("SERVER_FULL_URL"));
+
+		System.setProperty("MAIL_USERNAME", dotenv.get("MAIL_USERNAME"));
+		System.setProperty("MAIL_PASSWORD", dotenv.get("MAIL_PASSWORD"));
+
+		System.setProperty("DATASOURCE_URL", dotenv.get("DATASOURCE_URL"));
+		System.setProperty("DATASOURCE_USERNAME", dotenv.get("DATASOURCE_USERNAME"));
+		System.setProperty("DATASOURCE_PASSWORD", dotenv.get("DATASOURCE_PASSWORD"));
+
+		System.setProperty("PAYSTACK_SECRET_KEY", dotenv.get("PAYSTACK_SECRET_KEY"));
+		System.setProperty("PAYSTACK_PUBLIC_KEY", dotenv.get("PAYSTACK_PUBLIC_KEY"));
+
+		SpringApplication.run(CustomerModuleApplication.class, args);
+	}
+}
+

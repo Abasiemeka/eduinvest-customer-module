@@ -1,8 +1,10 @@
 package devandagile.customermodule.model.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
-import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
@@ -12,7 +14,6 @@ public record LoginDTO (
 				String UsernameOrEmail,
 
 				@NotNull
-				@Setter
 				@NotBlank(message = "Password Name is required")
 				@Size(max = 20, message = "Password must be less than or equal to 20 characters")
 				@Size(min = 8, message = "Password must be more than or equal to 8 characters")

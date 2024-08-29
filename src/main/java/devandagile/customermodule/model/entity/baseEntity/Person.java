@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.lang.NonNull;
 
 import java.time.LocalDateTime;
 
@@ -49,9 +50,9 @@ public abstract class Person {
 	@Column(nullable = false, unique = true)
 	private String phone;
 
-	@Email
+	@NonNull
 	@Column(nullable = false, unique = true)
-	private String email;
+	private Email email;
 
 
 	public String getFullName() {

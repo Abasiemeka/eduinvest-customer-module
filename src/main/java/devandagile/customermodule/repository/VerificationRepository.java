@@ -8,8 +8,5 @@ import java.util.Optional;
 
 public interface VerificationRepository extends JpaRepository<Verification, Long> {
 	@NonNull
-	Optional<Verification> findByEmailIgnoreCase(@NonNull String email);
-
-	@NonNull
 	Optional<Verification> findByToken(@NonNull String token);
 }

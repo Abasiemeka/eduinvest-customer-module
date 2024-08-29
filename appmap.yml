@@ -1,5 +1,0 @@
-language: "java"
-name: "eduinvest"
-appmap_dir: "tmp/appmap"
-packages:
-- path: "devandagile.customermodule"

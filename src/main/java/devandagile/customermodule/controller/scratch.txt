@@ -1,0 +1,763 @@
+spring.application.name=customerModule
+server.port=7075
+
+# Environment Variables
+paystack.secret.key=${PAYSTACK_SECRET_KEY}
+paystack.public.key=${PAYSTACK_PUBLIC_KEY}
+devandagile.server.url=${SERVER_FULL_URL}
+
+# Email Variables
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+#spring.mail.username="abasiemeka@gmail.com"
+#spring.mail.password=howkopfwxpoeefoa
+spring.mail.protocol=smtp
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+spring.mail.properties.mail.debug=true
+
+# Database Connection Settings
+spring.datasource.url=${DATASOURCE_URL}
+spring.datasource.username=${DATASOURCE_USERNAME}
+spring.datasource.password=${DATASOURCE_PASSWORD}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Hibernate settings
+spring.jpa.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=create
+
+# Logging Properties
+logging.level.org.springframework=info
+logging.level.org.thymeleaf=DEBUG
+
+# Thymeleaf Configuration
+spring.mvc.view.prefix=/WEB-INF/templates/
+spring.mvc.view.suffix=.html
+spring.thymeleaf.enabled=true
+spring.thymeleaf.prefix=classpath:/templates/
+spring.thymeleaf.suffix=.html
+
+# OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=428517625913-c5mvsjiqr0esdegu6dfrjla9calrq5dq.apps.googleusercontent.com
+spring.security.oauth2.client.registration.google.client-secret=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
+spring.security.oauth2.client.registration.google.scope=openid,email,profile
+spring.security.oauth2.client.registration.google.redirect-uri=https://127.0.0.1:7075/login/oauth2/code/google
+spring.security.oauth2.client.registration.google.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.user-name-attribute=sub
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+package devandagile.customermodule.service.serviceImpl;
+
+import devandagile.customermodule.model.entity.Verification;
+import devandagile.customermodule.repository.VerificationRepository;
+import devandagile.customermodule.service.VerificationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@RequiredArgsConstructor
+@Service
+public class VerificationServiceImpl implements VerificationService {
+	private final VerificationRepository verificationRepository;
+
+
+	@Override
+	public String createVerificationAndGetToken(String email, Integer validityDuration) {
+		Verification verification = new Verification(email, 10);
+		verificationRepository.save(verification);
+		return verification.getToken();
+	}
+}
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+package devandagile.customermodule.service.serviceImpl;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class TwoFactorAuthServiceImpl implements devandagile.customermodule.service.TwoFactorAuthService {
+}
+
+----------------------------------------------------------------------------------------------------------------------------------
+package devandagile.customermodule.service.serviceImpl;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class SecurityService extends BCryptPasswordEncoder {
+}
+----------------------------------------------------------------------------------------------------
+package devandagile.customermodule.service.serviceImpl;
+
+import devandagile.customermodule.config.PaystackConfig;
+import devandagile.customermodule.model.dto.PaystackPaymentRequestDTO;
+import devandagile.customermodule.service.PaystackService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Objects;
+
+@Service
+public class PaystackServiceImpl implements PaystackService {
+
+	private final String PAYSTACK_SECRET_KEY;
+	private final PaystackConfig paystackConfig;
+	private final RestTemplate restTemplate;
+
+	public PaystackServiceImpl(@Value("${paystack.secret.key}") String paystackSecretKey, PaystackConfig paystackConfig, RestTemplate restTemplate) {
+		PAYSTACK_SECRET_KEY = paystackSecretKey;
+		this.paystackConfig = paystackConfig;
+		this.restTemplate = restTemplate;
+	}
+
+	@Override
+	public String initializePayment(PaystackPaymentRequestDTO paymentRequestInKobo) {
+		String url = "https://api.paystack.co/transaction/initialize";
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + PAYSTACK_SECRET_KEY);
+		headers.set("Content-Type", "application/json");
+
+		HttpEntity<Object> requestEntity = new HttpEntity<>(paymentRequestInKobo, headers);
+
+		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+		return response.getBody();
+	}
+
+	public boolean verifyPayment(String reference) {
+		String url = "https://api.paystack.co/transaction/verify/" + reference;
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + PAYSTACK_SECRET_KEY);
+
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+		ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+		// Logic to parse the response and verify the status
+		return Objects.requireNonNull(response.getBody()).contains("\"status\": true");
+	}
+
+	// Method to verify webhook signature (optional for security)
+	@Override
+	public boolean verifyWebhookSignature(String payload, String signature) {
+		//check that implementation is properly configured
+        return paystackConfig.verifySignature(payload, signature);
+    }
+
+	// Method to process webhook events
+	@Override
+	public void processWebhookEvent(String payload) {
+		// Add logic to process the event and update your database accordingly
+		//fixme: check and implement
+		System.out.println("Processing Webhook Payload: " + payload);
+		// For example: check if it's a "charge.success" event and update payment status
+	}
+}
+---------------------------------------------------------------------------------------------------------------
+package devandagile.customermodule.service.serviceImpl;
+
+import devandagile.customermodule.config.exception.Exceptions.EmailSendingException;
+import devandagile.customermodule.model.dto.SimpleMailDTO;
+import devandagile.customermodule.service.EmailServiceOAuth;
+import devandagile.customermodule.service.OAuth2TokenService;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailServiceOAuthImpl implements EmailServiceOAuth {
+
+	private final JavaMailSender mailSender;
+	private final OAuth2TokenService oAuth2TokenService;
+	private final OAuth2AuthorizedClientService authorizedClientService;
+	private static final Logger logger = LoggerFactory.getLogger(EmailServiceOAuthImpl.class);
+
+	public EmailServiceOAuthImpl(JavaMailSender mailSender, OAuth2TokenService oAuth2TokenService, OAuth2AuthorizedClientService authorizedClientService) {
+		this.mailSender = mailSender;
+		this.oAuth2TokenService = oAuth2TokenService;
+		this.authorizedClientService = authorizedClientService;
+	}
+
+	@Override
+	public void sendEmail(SimpleMailDTO simpleMailDTO) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null) {
+			throw new IllegalStateException("User is not authenticated");
+		}
+
+		OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
+				"google", authentication.getName());
+
+		if (authorizedClient == null) {
+			throw new IllegalStateException("OAuth2AuthorizedClient is null");
+		}
+
+		if (authorizedClient.getAccessToken() == null) {
+			throw new IllegalStateException("AccessToken is null");
+		}
+
+		MimeMessagePreparator messagePreparator = getMimeMessagePreparator(simpleMailDTO, authorizedClient);
+
+		try {
+			mailSender.send(messagePreparator);
+			logger.info("Email sent successfully.");
+		} catch (MailException e) {
+			logger.error("Email sending failed.", e);
+			throw new EmailSendingException(e.getMessage() + " " + e.getRootCause(), e);
+		}
+	}
+
+	@NotNull
+	private static MimeMessagePreparator getMimeMessagePreparator(SimpleMailDTO simpleMailDTO, OAuth2AuthorizedClient authorizedClient) {
+
+		String oauthToken = authorizedClient.getAccessToken().getTokenValue();
+
+		return mimeMessage -> {
+			MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom("abasiemeka@gmail.com");
+			messageHelper.setTo(simpleMailDTO.to());
+			messageHelper.setSubject(simpleMailDTO.subject());
+			messageHelper.setText(simpleMailDTO.text());
+
+			// Some SMTP servers might not use Authorization header; verify if necessary
+			mimeMessage.addHeader("Authorization", "Bearer " + oauthToken);
+		};
+	}
+}
+
+package devandagile.customermodule.service.serviceImpl;
+
+import devandagile.customermodule.config.exception.Exceptions.EmailSendingException;
+import devandagile.customermodule.model.dto.SimpleMailDTO;
+import devandagile.customermodule.service.EmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+
+@Service
+public class EmailServiceImpl implements EmailService {
+
+	private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
+	private final JavaMailSender javaMailSender = new JavaMailSenderImpl();
+
+	@Override
+	@Async
+	public void sendSimpleMailMessage(SimpleMailDTO simpleMailDto) {
+		try {
+			SimpleMailMessage newMail = new SimpleMailMessage();
+			newMail.setTo(simpleMailDto.to());
+			newMail.setFrom("abasiemeka@gmail.com");
+			newMail.setSubject(simpleMailDto.subject());
+			newMail.setText(simpleMailDto.text());
+
+			javaMailSender.send(newMail);
+			logger.info("Email Successfully sent.");
+		} catch (MailException e) {
+			logger.info("Email sending failed.");
+			throw new EmailSendingException(e.getMessage() + " " + e.getRootCause(), e);
+		}
+	}
+}
+
+
+package devandagile.customermodule.service.serviceImpl;
+
+import devandagile.customermodule.config.exception.Exceptions.UserNotFoundException;
+import devandagile.customermodule.model.dto.SignupDTO;
+import devandagile.customermodule.model.dto.SimpleMailDTO;
+import devandagile.customermodule.model.entity.Customer;
+import devandagile.customermodule.model.entity.Verification;
+import devandagile.customermodule.repository.CustomerRepository;
+import devandagile.customermodule.repository.VerificationRepository;
+import devandagile.customermodule.service.CustomerService;
+import devandagile.customermodule.service.EmailServiceOAuth;
+import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import javax.naming.AuthenticationException;
+
+@Service
+public class CustomerServiceImpl implements CustomerService {
+
+	private static final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
+
+	private final EmailServiceOAuth mailer;
+	private final CustomerRepository customerRepository;
+	private final VerificationRepository verificationRepository;
+
+	public CustomerServiceImpl(EmailServiceOAuth mailer, CustomerRepository customerRepository,
+	                           VerificationRepository verificationRepository) {
+		this.mailer = mailer;
+		this.customerRepository = customerRepository;
+		this.verificationRepository = verificationRepository;
+	}
+
+	@Override
+	public Customer getCustomerById(Long id) throws UserNotFoundException {
+		return customerRepository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("No such customer."));
+	}
+
+	@Override
+	public Customer getCustomerByEmailOrNull(String email) {
+		return customerRepository.findCustomerByEmailIgnoreCase(email).orElse(null);
+	}
+
+	@Override
+	public Customer signup(SignupDTO customer, String encodedPassword) {
+		Customer newCustomer = Customer
+				.builder()
+				.firstName(customer.firstName())
+				.lastName(customer.lastName())
+				.phone(customer.phone())
+				.email(customer.email())
+				.password(encodedPassword)
+				.referralCode(customer.referralCode())
+				.build();
+
+		customerRepository.save(newCustomer);
+		return newCustomer;
+	}
+
+	@SneakyThrows
+	@Override
+	public ResponseEntity<String> verifyCustomerEmail(String vtoken) {
+		Verification verification = verificationRepository.findByToken(vtoken)
+				.orElseThrow(AuthenticationException::new);
+
+		return (verification.isExpired())
+				? ResponseEntity.status(HttpStatus.BAD_REQUEST).body(discardRegistrationAttempt(verification))
+				: ResponseEntity.status(HttpStatus.ACCEPTED).body(enableVerifiedCustomer(verification));
+	}
+
+	private String enableVerifiedCustomer(Verification verification) {
+		String emailAddress = verification.getEmail();
+		customerRepository.findCustomerByEmailIgnoreCase(emailAddress).orElseThrow().setEnabled(true);
+		verificationRepository.delete(verification);
+		mailer.sendEmail(SimpleMailDTO
+				.builder()
+				.to(verification.getEmail())
+				.subject("Email Verified.")
+				.text("Your email address was successfully verified and your registration with EduInvest is complete. Kindly login to continue.")
+				.build());
+		logger.info("Email verification successful for {}. Customer enabled and verification object dismissed.", emailAddress);
+		return "Verification Successful. Customer registered successfully and notified by email.";
+	}
+
+	private String discardRegistrationAttempt(Verification verification) {
+		String emailAddress = verification.getEmail();
+		customerRepository.deleteCustomerByEmail(emailAddress);
+		logger.info("Customer with email {} has been deleted. Verification expired.", emailAddress);
+		mailer.sendEmail(SimpleMailDTO
+				.builder()
+				.to(emailAddress)
+				.subject("Email Verification Failed.")
+				.text("EduInvest could not verify your email address as the time limit has expired." +
+						" Kindly register again.")
+				.build());
+		logger.info("Email notification sent to {} requesting re-registration.", emailAddress);
+		verificationRepository.delete(verification);
+		logger.info("Verification instance for {} has been deleted", emailAddress);
+		return "Verification failed. Token was expired. Registration for Customer with email " + emailAddress + " has been reversed.";
+	}
+
+	@Override
+	public boolean customerExists(String email) {
+		return getCustomerByEmailOrNull(email) != null;
+	}
+}
+
+
+
+package devandagile.customermodule.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.stereotype.Service;
+
+@Service
+public class OAuth2TokenService {
+
+	private final OAuth2AuthorizedClientService authorizedClientService;
+	private static final Logger logger = LoggerFactory.getLogger(OAuth2TokenService.class);
+
+	public OAuth2TokenService(OAuth2AuthorizedClientService authorizedClientService) {
+		this.authorizedClientService = authorizedClientService;
+	}
+
+	// The method to get the access token from the OAuth2AuthorizedClient
+	public String getAccessToken(OAuth2AuthorizedClient authorizedClient) {
+		if (authorizedClient == null) {
+			logger.error("OAuth2AuthorizedClient is null.");
+			throw new IllegalArgumentException("OAuth2AuthorizedClient cannot be null");
+		}
+
+		if (authorizedClient.getAccessToken() == null) {
+			logger.error("AccessToken is null for the given OAuth2AuthorizedClient.");
+			throw new IllegalStateException("AccessToken is null");
+		}
+
+		String tokenValue = authorizedClient.getAccessToken().getTokenValue();
+		logger.debug("Access token retrieved: {}", tokenValue);
+		return tokenValue;
+	}
+}
+
+
+package devandagile.customermodule.service;
+
+public interface VerificationService {
+	String createVerificationAndGetToken(String email, Integer validityDuration);
+}
+
+
+package devandagile.customermodule.service;
+
+public interface TwoFactorAuthService {
+}
+
+
+
+package devandagile.customermodule.service;
+
+import devandagile.customermodule.model.dto.PaystackPaymentRequestDTO;
+
+public interface PaystackService {
+
+	void processWebhookEvent(String payload);
+
+	String initializePayment(PaystackPaymentRequestDTO paymentRequest);
+
+	boolean verifyPayment(String reference);
+
+	boolean verifyWebhookSignature(String payload, String signature);
+}
+
+
+
+package devandagile.customermodule.service;
+
+import devandagile.customermodule.model.dto.SimpleMailDTO;
+
+public interface EmailServiceOAuth {
+	void sendEmail(SimpleMailDTO simpleMailDTO);
+}
+
+
+package devandagile.customermodule.service;
+
+import devandagile.customermodule.model.dto.SimpleMailDTO;
+
+public interface EmailService {
+	void sendSimpleMailMessage(SimpleMailDTO simpleMailDto);
+}
+
+
+package devandagile.customermodule.service;
+
+import devandagile.customermodule.model.dto.SignupDTO;
+import devandagile.customermodule.model.entity.Customer;
+import org.springframework.http.ResponseEntity;
+
+public interface CustomerService {
+
+	Customer getCustomerById(Long id);
+
+	Customer getCustomerByEmailOrNull(String email);
+
+	Customer signup(SignupDTO customer, String encodedPassword);
+
+	ResponseEntity<String> verifyCustomerEmail(String vtoken);
+
+	boolean customerExists(String email);
+}
+
+
+
+package devandagile.customermodule.repository;
+
+import devandagile.customermodule.model.entity.Verification;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.lang.NonNull;
+
+import java.util.Optional;
+
+public interface VerificationRepository extends JpaRepository<Verification, Long> {
+	@NonNull
+	Optional<Verification> findByEmailIgnoreCase(@NonNull String email);
+
+	@NonNull
+	Optional<Verification> findByToken(@NonNull String token);
+}
+
+
+package devandagile.customermodule.repository;
+
+import devandagile.customermodule.model.entity.Customer;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.lang.NonNull;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+	Optional<Customer> findCustomerByEmailIgnoreCase(@NonNull String email);
+	void deleteByEmail(@NotBlank String email);
+
+	void deleteCustomerByEmail(String email);
+}
+
+
+
+package devandagile.customermodule.model.enums;
+
+public enum States {
+	ABIA, ADAMAWA, ANAMBRA,
+}
+
+
+
+package devandagile.customermodule.model.enums;
+
+public enum Roles {
+	ROLE_USER, ROLES_ADMIN, ROLES_AGENT
+}
+
+package devandagile.customermodule.model.enums;
+
+public enum ProductType {
+
+}
+
+
+package devandagile.customermodule.model.enums;
+
+public enum MethodFor2FA {
+	GOOGLE2FA, QRCODE2FA, OTPTOEMAIL, OTPTOSMS
+}
+
+
+package devandagile.customermodule.model.enums;
+
+public enum Gender {
+	MALE, FEMALE, CAMEL, EMAIL
+}
+
+
+package devandagile.customermodule.model.enums;
+
+public enum CustomerType {
+	FATHER,
+	MOTHER,
+	GUARDIAN
+}
+
+
+package devandagile.customermodule.model.entity.baseEntity;
+
+import devandagile.customermodule.model.enums.States;
+import jakarta.persistence.Embeddable;
+import lombok.Data;
+
+@Data
+@Embeddable
+public final class Address {
+	private Integer houseNumber;
+	private String street;
+	private String landmark;
+	private String city;
+	private States state;
+	private String country;
+}
+
+
+package devandagile.customermodule.model.entity.baseEntity;
+
+import devandagile.customermodule.model.enums.Gender;
+import devandagile.customermodule.model.enums.MethodFor2FA;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@MappedSuperclass
+@SuperBuilder
+@ToString
+@Getter
+@Setter
+public abstract class Person {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false, updatable = false)
+	private Long id;
+
+	@Builder.Default
+	@Column(nullable = false)
+	private boolean isEnabled = false;
+
+	@Builder.Default
+	@Column(nullable = false)
+	private boolean enable2FA = false;
+
+	private MethodFor2FA methodFor2FA;
+
+	@Column(nullable = false, updatable = false)
+	private String firstName;
+	@Column(nullable = false, updatable = false)
+	private String lastName;
+	@Column(nullable = true, updatable = false)
+	private Gender gender;
+	@Column(nullable = true, updatable = false)
+	private LocalDateTime dob;
+
+	@Embedded
+	private Address address;
+
+	@Column(nullable = false)
+	private String password;
+
+	@Column(nullable = false, unique = true)
+	private String phone;
+
+	@Email
+	@Column(nullable = false, unique = true)
+	private String email;
+
+
+	public String getFullName() {
+		return this.firstName + " " + this.lastName;
+	}
+}
+
+
+package devandagile.customermodule.model.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Getter
+@Entity
+@NoArgsConstructor
+public class Verification {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@CreationTimestamp
+	private LocalDateTime createdAt;
+
+	@NotBlank
+	@NotNull
+	@Column(unique = true, nullable = false, updatable = false)
+	@Email
+	private String email;
+
+	@Column(nullable = false, unique = true)
+	private String token;
+	private LocalDateTime expiresAt;
+	private Integer validityDuration;
+
+	public Verification(String email, Integer validityDuration) {
+		this.email = email;
+		this.validityDuration = validityDuration;
+		this.token = UUID.randomUUID().toString();
+	}
+
+	@PostLoad
+	@PostPersist
+	private void calculateExpiry() {
+		this.expiresAt = createdAt.plusMinutes(validityDuration);
+	}
+
+	public boolean isExpired() {
+		return LocalDateTime.now().isAfter(this.expiresAt);
+	}
+}
+
+
+package devandagile.customermodule.model.entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
+
+@NoArgsConstructor
+@Data
+@Entity
+@Embeddable
+public class Transaction {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+
+	@CreationTimestamp
+	private LocalDateTime createdAt;
+
+	@NotNull
+	private Long amount;
+
+	@OneToOne
+	private Customer customer;
+
+	@OneToOne
+	private Child child;
+
+	@OneToOne
+	private Product product;
+
+	private String referral;
+}
+
+

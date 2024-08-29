@@ -1,5 +1,7 @@
 package devandagile.customermodule.service.serviceImpl;// Test file path: C:/Users/abasi/devandagile/Projects/eduinvest/src/test/java/devandagile/customermodule/service/serviceImpl/PaystackServiceImpl.java
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import devandagile.customermodule.model.dto.VerificationResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
@@ -21,8 +23,8 @@ public class PaystackServiceImplTest {
     @BeforeEach
     public void setUp() {
         restTemplate = mock(RestTemplate.class);
-        paystackService = new PaystackServiceImpl
-                ("sk_test_abcdef1234567890", null, restTemplate);
+        ObjectMapper objectMapper = new ObjectMapper();
+        paystackService = new PaystackServiceImpl(restTemplate, "sk_test_abcdef1234567890", "https://api.paystack.co", "/transaction/verify/", objectMapper);
     }
 
     @Test
@@ -39,9 +41,9 @@ public class PaystackServiceImplTest {
                                 eq(String.class))).thenReturn(responseEntity);
 
         // When
-        boolean result = paystackService.verifyPayment(reference);
+        VerificationResponse result = paystackService.verifyTransaction(reference);
 
         // Then
-        assertFalse(result);
+        assertFalse(result.status());
     }
 }

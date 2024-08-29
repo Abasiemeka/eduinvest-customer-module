@@ -21,6 +21,7 @@ public record ChildDetailsDTO(
 				@Column(nullable = false, updatable = false)
 				LocalDateTime dob,
 
+				@Embedded
 				@AttributeOverride(name = "houseNumber", column = @Column(name = "number"))
 				@AttributeOverride(name = "street", column = @Column(name = "street/road"))
 				@AttributeOverride(name = "landmark", column = @Column(name = "zip"))

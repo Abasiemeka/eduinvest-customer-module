@@ -23,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
 	public void sendSimpleMailMessage(SimpleMailDTO simpleMailDto) {
 		try {
 			SimpleMailMessage newMail = new SimpleMailMessage();
-			newMail.setTo(simpleMailDto.to());
+			newMail.setTo(String.valueOf(simpleMailDto.to()));
 			newMail.setFrom("abasiemeka@gmail.com");
 			newMail.setSubject(simpleMailDto.subject());
 			newMail.setText(simpleMailDto.text());
