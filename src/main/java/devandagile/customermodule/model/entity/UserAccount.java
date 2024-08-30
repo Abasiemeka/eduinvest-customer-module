@@ -28,7 +28,8 @@ public class UserAccount implements UserDetails{
 	private Long id;
 
 	@NonNull
-	private Email username;
+	@Email
+	private String username;
 
 	@Enumerated
 	@NonNull

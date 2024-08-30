@@ -7,7 +7,7 @@ import org.springframework.lang.NonNull;
 @Builder
 public record VerificationMailDTO(
 		@NonNull String firstName,
-		@NonNull Email email,
+		@NonNull @Email String email,
 		@NonNull String verificationToken
 ) {
 }

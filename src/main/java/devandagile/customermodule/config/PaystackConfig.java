@@ -12,7 +12,7 @@ public class PaystackConfig {
 	private final Dotenv dotenv = Dotenv.load();
 
 	@Getter
-	@Value("${paystack.secret.key}")
+	@Value("${PAYSTACK_SECRET_KEY}")
 	private String paystackSecretKey;
 
 	@PostConstruct

@@ -23,7 +23,7 @@ public record SignupDTO (
 				@NotBlank(message = "Email Name is required")
 				@Email(message = "A valid email is required")
 				@Column(unique = true)
-				Email email,
+				String email,
 
 				@NotNull
 				@NotBlank(message = "Password Name is required")

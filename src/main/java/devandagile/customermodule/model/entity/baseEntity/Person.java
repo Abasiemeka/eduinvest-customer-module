@@ -1,9 +1,9 @@
 package devandagile.customermodule.model.entity.baseEntity;
 
+import devandagile.customermodule.model.entity.Address;
 import devandagile.customermodule.model.enums.Gender;
 import devandagile.customermodule.model.enums.MethodFor2FA;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.lang.NonNull;
@@ -52,7 +52,7 @@ public abstract class Person {
 
 	@NonNull
 	@Column(nullable = false, unique = true)
-	private Email email;
+	private String email;
 
 
 	public String getFullName() {

@@ -13,11 +13,11 @@ public interface CustomerService extends UserDetailsService, OAuth2UserService<O
 
 	Customer getCustomerById(Long id);
 
-	Customer getCustomerByEmailOrNull(Email email);
+	Customer getCustomerByEmailOrNull(String email);
 
 	ResponseEntity<String> signup(SignupDTO customer, String encodedPassword);
 
 	ResponseEntity<String> verifyCustomerEmail(String vtoken);
 
-	boolean customerExists(Email email);
+	boolean customerExists(String email);
 }

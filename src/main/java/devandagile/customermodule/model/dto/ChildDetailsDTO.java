@@ -1,10 +1,9 @@
 package devandagile.customermodule.model.dto;
 
-import devandagile.customermodule.model.entity.baseEntity.Address;
+import devandagile.customermodule.model.entity.Address;
 import devandagile.customermodule.model.enums.Gender;
 import jakarta.persistence.*;
 import lombok.Builder;
-import lombok.Getter;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;

@@ -58,7 +58,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public Customer getCustomerByEmailOrNull(Email email) {
+	public Customer getCustomerByEmailOrNull(String email) {
 		return customerRepository.findCustomerByEmailIgnoreCase(email).orElse(null);
 	}
 
@@ -117,7 +117,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private String enableVerifiedCustomer(Verification verification) {
-		Email emailAddress = verification.getEmail();
+		String emailAddress = verification.getEmail();
 		customerRepository.findCustomerByEmailIgnoreCase(emailAddress).orElseThrow().setEnabled(true);
 		verificationRepository.delete(verification);
 		emailServiceOAuth.sendEmail(SimpleMailDTO
@@ -131,7 +131,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private String discardRegistrationAttempt(Verification verification) {
-		Email emailAddress = verification.getEmail();
+		String emailAddress = verification.getEmail();
 		customerRepository.deleteCustomerByEmail(emailAddress);
 		logger.info("Customer with email {} has been deleted. Verification expired.", emailAddress);
 		emailServiceOAuth.sendEmail(SimpleMailDTO
@@ -148,7 +148,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public boolean customerExists(Email email) {
+	public boolean customerExists(String email) {
 		return getCustomerByEmailOrNull(email) != null;
 	}
 
@@ -179,7 +179,7 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private UserAccount processOAuth2User(String registrationId, Map<String, Object> attributes, String userNameAttributeName) {
-		Email email = (Email) attributes.get("email");
+		String email = String.valueOf(attributes.get("email"));
 		Customer customer = customerRepository.findCustomerByEmailIgnoreCase(email)
 				.orElseGet(() -> createNewCustomer(registrationId, attributes));
 
@@ -188,7 +188,7 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private Customer createNewCustomer(String registrationId, Map<String, Object> attributes) {
 		Customer customer = new Customer();
-		customer.setEmail((Email) attributes.get("email"));
+		customer.setEmail(String.valueOf(attributes.get("email")));
 		customer.setFirstName((String) attributes.get("given_name"));
 		customer.setLastName((String) attributes.get("family_name"));
 

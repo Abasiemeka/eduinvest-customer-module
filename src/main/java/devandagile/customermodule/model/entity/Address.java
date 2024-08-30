@@ -1,4 +1,4 @@
-package devandagile.customermodule.model.entity.baseEntity;
+package devandagile.customermodule.model.entity;
 
 import devandagile.customermodule.model.enums.States;
 import jakarta.persistence.Embeddable;
