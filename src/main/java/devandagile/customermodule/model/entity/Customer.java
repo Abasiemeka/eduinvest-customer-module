@@ -5,9 +5,7 @@ import devandagile.customermodule.model.enums.CustomerType;
 import devandagile.customermodule.model.enums.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
@@ -22,7 +20,7 @@ public class Customer extends Person {
 
 	@OneToOne
 	@JoinColumn(name = "account_name", referencedColumnName = "id")
-	private UserAccount account;
+	private UserAccount account = null;
 
 	private String referralCode;
 	private CustomerType relationship;

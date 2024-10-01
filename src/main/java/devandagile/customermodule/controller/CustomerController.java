@@ -2,43 +2,29 @@ package devandagile.customermodule.controller;
 
 import devandagile.customermodule.model.dto.*;
 import devandagile.customermodule.model.entity.Child;
-import devandagile.customermodule.model.entity.Customer;
 import devandagile.customermodule.model.enums.Gender;
 import devandagile.customermodule.service.CustomerService;
-import devandagile.customermodule.service.EmailService;
-import devandagile.customermodule.service.EmailServiceOAuth;
-import devandagile.customermodule.service.VerificationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+
 @RestController
-@RequestMapping("/v1/customer")
+@RequestMapping({"/v1/customer", "/v1/customer/"})
 @Validated
 public class CustomerController {
 
-	private final Environment env;
-	private final EmailService emailService;
-	private final EmailServiceOAuth emailServiceOAuth;
 	private final CustomerService customerService;
-	private final VerificationService verificationService;
 	private final PasswordEncoder passwordEncoder;
 
-	public CustomerController(Environment env,
-	                          EmailService emailService, EmailServiceOAuth emailServiceOAuth,
-	                          CustomerService customerService,
-	                          VerificationService verificationService,
+	public CustomerController(CustomerService customerService,
 	                          PasswordEncoder passwordEncoder) {
-		this.env = env;
-		this.emailService = emailService;
-		this.emailServiceOAuth = emailServiceOAuth;
 		this.customerService = customerService;
-		this.verificationService = verificationService;
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -48,24 +34,27 @@ public class CustomerController {
 	}
 
 	@PostMapping("/signup")
-	public ResponseEntity<String> signup(@Valid @RequestBody SignupDTO customer) {
-		// Encode password, create customer send verification email.
-		return customerService.signup(customer, passwordEncoder.encode(customer.password()));
+	public GenericResponse signup(@Valid @RequestBody SignupDTO customerSignupDTO) {
+		return customerService.signup(customerSignupDTO, passwordEncoder.encode(customerSignupDTO.password()));
 	}
 
 	@GetMapping("/verify-mail")
-	public ResponseEntity<String> confirmEmail(@RequestParam("vtoken") @NotNull String vtoken){
+	public GenericResponse verifyEmail(@RequestParam("vtoken") @NotNull String vtoken){
 		return customerService.verifyCustomerEmail(vtoken);
 	}
 
 	@GetMapping("/login")
 	public ResponseEntity<String> login() {
-		return ResponseEntity.status(HttpStatus.OK).body("Please login to continue.");
+		return ResponseEntity.status(HttpStatus.OK).body("Welcome to EduInvest Login Page");
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<Customer> login(@Validated @RequestBody LoginDTO loginDTO) {
-		return null;
+	public GenericResponse login(@Validated @RequestBody LoginDTO loginDTO) {
+		return Objects.isNull(loginDTO)
+				?
+				customerService.loadUser(authorizationHeader.substring(7))
+				:
+		customerService.login(loginDTO.UsernameOrEmail(), passwordEncoder.encode(loginDTO.password()));
 	}
 
 	@GetMapping("/forgot-password")

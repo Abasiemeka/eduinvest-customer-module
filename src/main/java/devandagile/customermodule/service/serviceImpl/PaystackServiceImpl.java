@@ -192,7 +192,7 @@ public class PaystackServiceImpl implements PaystackService {
 //		return Objects.requireNonNull(response.getBody()).contains("\"status\": true");
 //
 //		// todo: implement the transaction status update logic here, but secondary to the one in the webhook
-//		//  For demonstration purposes, let's assume the transaction is successful, then set transaction.status to SUCCESS
+//		//  For demonstration purposes, let's assume the transaction is successful, then set transaction.status to SUCCESSFUL
 //	}
 //
 //	// Method to verify webhook signature (optional for security)

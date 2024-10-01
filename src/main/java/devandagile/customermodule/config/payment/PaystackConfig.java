@@ -1,4 +1,4 @@
-package devandagile.customermodule.config;
+package devandagile.customermodule.config.payment;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.annotation.PostConstruct;

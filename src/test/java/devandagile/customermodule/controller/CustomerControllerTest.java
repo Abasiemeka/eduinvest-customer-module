@@ -16,7 +16,7 @@ class CustomerControllerTest {
 	}
 
 	@Test
-	void confirmEmail() {
+	void verifyEmail() {
 	}
 
 	@Test

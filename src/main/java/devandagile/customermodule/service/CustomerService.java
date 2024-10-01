@@ -1,8 +1,8 @@
 package devandagile.customermodule.service;
 
+import devandagile.customermodule.model.dto.GenericResponse;
 import devandagile.customermodule.model.dto.SignupDTO;
 import devandagile.customermodule.model.entity.Customer;
-import jakarta.validation.constraints.Email;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -15,9 +15,11 @@ public interface CustomerService extends UserDetailsService, OAuth2UserService<O
 
 	Customer getCustomerByEmailOrNull(String email);
 
-	ResponseEntity<String> signup(SignupDTO customer, String encodedPassword);
+	GenericResponse signup(SignupDTO customer, String encodedPassword);
 
-	ResponseEntity<String> verifyCustomerEmail(String vtoken);
+	GenericResponse verifyCustomerEmail(String vtoken);
+
+	GenericResponse login(String email, String password);
 
 	boolean customerExists(String email);
 }

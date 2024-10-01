@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduInvest - Check Your Email</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            display: flex;
+            height: 100%;
+        }
+        .left-section {
+            width: 50%;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .right-section {
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, #ff00ff, #00ffff);
+            border-radius: 25%;
+            margin-right: 0.5rem;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        .feature-icon {
+            width: 2rem;
+            height: 2rem;
+            background-color: #4c1d95;
+            border-radius: 50%;
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feature-text h3 {
+            margin: 0 0 0.5rem 0;
+        }
+        .feature-text p {
+            margin: 0;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .footer {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+        .footer a {
+            color: #888;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #e0e0e0;
+        }
+        .email-verification {
+            background-color: #2a2a2a;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .email-icon {
+            width: 4rem;
+            height: 4rem;
+            background-color: #4c1d95;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .email-icon svg {
+            width: 2rem;
+            height: 2rem;
+        }
+        .open-email-button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #8b5cf6;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        .open-email-button:hover {
+            background-color: #7c3aed;
+        }
+        .resend-link {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .resend-link a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: #888;
+            text-decoration: none;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .back-link svg {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="left-section">
+        <div>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h2>Eduinvest</h2>
+            </div>
+            <h1>Welcome to Eduinvest</h1>
+            <p class="subtitle">No credit card required</p>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Get unlimited referrals</h3>
+                        <p>Unlock the power of Eduinvest's investment plans and reap the rewards of referrals! Invite others to join our platform, and as they invest, you'll earn valuable incentives.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Ensured investment</h3>
+                        <p>Gain real-time, comprehensive insights into your investments.</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    </div>
+                    <div class="feature-text">
+                        <h3>Built-in security</h3>
+                        <p>Rest assured, all your information is securely stored. Our platform features robust built-in security measures to safeguard your data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <a href="#">Terms</a>
+            <a href="#">Privacy</a>
+            <a href="#">Docs</a>
+            <a href="#">Help</a>
+            <div>
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                English
+            </div>
+        </div>
+    </div>
+    <div class="right-section">
+        <div class="email-verification">
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <h2>Eduinvest</h2>
+            </div>
+            <div class="email-icon">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            </div>
+            <h2>Check your email</h2>
+            <p>open mail app to verify</p>
+            <button class="open-email-button">Open email app</button>
+            <p class="resend-link">Didn't receive the email? <a href="#">Click to resend</a></p>
+            <a href="#" class="back-link">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

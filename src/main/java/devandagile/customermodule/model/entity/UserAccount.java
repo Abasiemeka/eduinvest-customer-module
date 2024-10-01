@@ -1,6 +1,7 @@
 package devandagile.customermodule.model.entity;
 
 import devandagile.customermodule.model.enums.Authority;
+import devandagile.customermodule.model.enums.MethodFor2FA;
 import devandagile.customermodule.model.enums.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -26,6 +27,21 @@ public class UserAccount implements UserDetails{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	@Builder.Default
+	@Column(nullable = false)
+	private boolean isEnabled = false;
+
+	@Builder.Default
+	@Column(nullable = false)
+	private boolean isLoggedIn = false;
+
+	@Builder.Default
+	@Column(nullable = false)
+	private boolean enable2FA = false;
+
+	@Enumerated
+	private MethodFor2FA methodFor2FA;
 
 	@NonNull
 	@Email
@@ -76,7 +92,7 @@ public class UserAccount implements UserDetails{
 
 	@Override
 	public boolean isEnabled() {
-		return UserDetails.super.isEnabled();
+		return this.isEnabled;
 	}
 
 	public void setProviderId(String sub) {

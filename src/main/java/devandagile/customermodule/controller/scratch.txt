@@ -100,7 +100,7 @@ public class SecurityService extends BCryptPasswordEncoder {
 ----------------------------------------------------------------------------------------------------
 package devandagile.customermodule.service.serviceImpl;
 
-import devandagile.customermodule.config.PaystackConfig;
+import devandagile.customermodule.config.payment.PaystackConfig;
 import devandagile.customermodule.model.dto.PaystackPaymentRequestDTO;
 import devandagile.customermodule.service.PaystackService;
 import org.springframework.beans.factory.annotation.Value;

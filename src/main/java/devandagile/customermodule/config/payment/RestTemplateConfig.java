@@ -1,4 +1,4 @@
-package devandagile.customermodule.config;
+package devandagile.customermodule.config.payment;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

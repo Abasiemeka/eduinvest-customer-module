@@ -1,8 +1,9 @@
 @startuml
 
 /' diagram meta data start
-config=StructureConfiguration;
+config=FlowConfiguration;
 {
+  "rootMethod": "devandagile.customermodule.config.mailing.MailConfig#oAuth2TokenService(OAuth2AuthorizedClientService)",
   "projectClassification": {
     "searchMode": "OpenProject", // OpenProject, AllProjects
     "includedProjects": "",
@@ -60,17 +61,7 @@ config=StructureConfiguration;
     "onlyShowApplicationEntryPoints": false, // root node is included
     "useMethodCallsForStructureDiagram": "ForwardOnly" // ForwardOnly, BothDirections, No
   },
-  "details": {
-    "aggregation": "GroupByClass", // ByClass, GroupByClass, None
-    "showClassGenericTypes": true,
-    "showMethods": true,
-    "showMethodParameterNames": true,
-    "showMethodParameterTypes": true,
-    "showMethodReturnType": true,
-    "showPackageLevels": 2,
-    "showDetailedClassStructure": true
-  },
-  "rootClass": "devandagile.customermodule.config.payment.PaystackConfig",
+  "rootClass": "devandagile.customermodule.config.mailing.MailConfig",
   "extensionCallbackMethod": "" // qualified.class.name#methodName - signature: public static String method(String)
 }
 diagram meta data end '/
@@ -83,35 +74,7 @@ digraph g {
     
 
 'nodes 
-subgraph cluster_1632024630 { 
-   	label=customermodule
-	labeljust=l
-	fillcolor="#ececec"
-	style=filled
-   
-   subgraph cluster_1427871258 { 
-   	label=config
-	labeljust=l
-	fillcolor="#d8d8d8"
-	style=filled
-   
-   PaystackConfig117053334[
-	label=<<TABLE BORDER="1" CELLBORDER="0" CELLPADDING="4" CELLSPACING="0">
-<TR><TD ALIGN="LEFT" >(C)PaystackConfig</TD></TR>
-<HR/>
-<TR><TD ALIGN="LEFT" >-   dotenv: Dotenv [0..1]</TD></TR>
-<TR><TD ALIGN="LEFT" >-   paystackSecretKey: String [0..1]</TD></TR>
-<HR/>
-<TR><TD ALIGN="LEFT" >+ init()</TD></TR>
-<TR><TD ALIGN="LEFT" >+ verifySignature(payload: String, signature: String): boolean</TD></TR>
-</TABLE>>
-	style=filled
-	margin=0
-	shape=plaintext
-	fillcolor="#FFFFFF"
-];
-} 
-} 
+
 
 'edges    
 

@@ -1,4 +1,4 @@
-package devandagile.customermodule.config;
+package devandagile.customermodule.config.mailing;
 
 import devandagile.customermodule.service.OAuth2TokenService;
 import org.springframework.context.annotation.Bean;

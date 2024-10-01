@@ -3,7 +3,7 @@
 /' diagram meta data start
 config=FlowConfiguration;
 {
-  "rootMethod": "devandagile.customermodule.config.PaystackConfig#init()",
+  "rootMethod": "devandagile.customermodule.config.payment.PaystackConfig#init()",
   "projectClassification": {
     "searchMode": "OpenProject", // OpenProject, AllProjects
     "includedProjects": "",
@@ -61,7 +61,7 @@ config=FlowConfiguration;
     "onlyShowApplicationEntryPoints": false, // root node is included
     "useMethodCallsForStructureDiagram": "ForwardOnly" // ForwardOnly, BothDirections, No
   },
-  "rootClass": "devandagile.customermodule.config.PaystackConfig",
+  "rootClass": "devandagile.customermodule.config.payment.PaystackConfig",
   "extensionCallbackMethod": "" // qualified.class.name#methodName - signature: public static String method(String)
 }
 diagram meta data end '/

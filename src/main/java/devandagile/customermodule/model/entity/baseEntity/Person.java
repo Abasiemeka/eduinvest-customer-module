@@ -2,9 +2,11 @@ package devandagile.customermodule.model.entity.baseEntity;
 
 import devandagile.customermodule.model.entity.Address;
 import devandagile.customermodule.model.enums.Gender;
-import devandagile.customermodule.model.enums.MethodFor2FA;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.lang.NonNull;
 
@@ -21,16 +23,6 @@ public abstract class Person {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id", nullable = false, updatable = false)
 	private Long id;
-
-	@Builder.Default
-	@Column(nullable = false)
-	private boolean isEnabled = false;
-
-	@Builder.Default
-	@Column(nullable = false)
-	private boolean enable2FA = false;
-
-	private MethodFor2FA methodFor2FA;
 
 	@Column(nullable = false, updatable = false)
 	private String firstName;

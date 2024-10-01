@@ -1,25 +1,22 @@
 package devandagile.customermodule.service.serviceImpl;
 
 import devandagile.customermodule.config.exception.Exceptions.UserNotFoundException;
+import devandagile.customermodule.model.dto.GenericResponse;
 import devandagile.customermodule.model.dto.SignupDTO;
 import devandagile.customermodule.model.dto.SimpleMailDTO;
 import devandagile.customermodule.model.dto.VerificationMailDTO;
 import devandagile.customermodule.model.entity.Customer;
 import devandagile.customermodule.model.entity.UserAccount;
 import devandagile.customermodule.model.entity.Verification;
-import devandagile.customermodule.model.enums.Authority;
 import devandagile.customermodule.model.enums.Roles;
 import devandagile.customermodule.repository.CustomerRepository;
 import devandagile.customermodule.repository.VerificationRepository;
 import devandagile.customermodule.service.CustomerService;
 import devandagile.customermodule.service.EmailServiceOAuth;
 import devandagile.customermodule.service.VerificationService;
-import jakarta.validation.constraints.Email;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -32,6 +29,10 @@ import org.springframework.stereotype.Service;
 
 import javax.naming.AuthenticationException;
 import java.util.Map;
+import java.util.Set;
+
+import static devandagile.customermodule.model.dto.GenericResponse.badRequest;
+import static devandagile.customermodule.model.enums.Authority.ROLE_USER;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -63,28 +64,22 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	@Override
-	public ResponseEntity<String> signup(SignupDTO customer, String encodedPassword) {
+	public GenericResponse signup(SignupDTO customer, String encodedPassword) {
 		if (customerExists(customer.email())) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Customer with email already exists");
+			return badRequest("Customer with email already exists");
 		}
 
 		Customer createdCustomer = customerRepository.save(
-						Customer
-								.builder()
-								.firstName(customer.firstName())
-								.lastName(customer.lastName())
-								.phone(customer.phone())
-								.email(customer.email())
-								.password(encodedPassword)
-								.account(UserAccount
-										.builder()
-										.username(customer.email())
-										.role(Roles.ROLE_USER)
-										.authority(Authority.ROLE_USER)
-										.build())
-								.referralCode(customer.referralCode())
-								.build()
-				);
+				Customer
+						.builder()
+						.firstName(customer.firstName())
+						.lastName(customer.lastName())
+						.phone(customer.phone())
+						.email(customer.email())
+						.password(encodedPassword)
+						.referralCode(customer.referralCode())
+						.build()
+		);
 
 		logger.info("Customer created successfully as follows: " +
 						"Customer name = {}, Customer email = {}",
@@ -102,36 +97,75 @@ public class CustomerServiceImpl implements CustomerService {
 
 		logger.info("Verification email sent to customer with email = {}", createdCustomer.getEmail());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body("Account created. Awaiting email verification.");
+		return GenericResponse.successful("Account created. Check your email inbox to proceed.");
 	}
+
 
 	@SneakyThrows
 	@Override
-	public ResponseEntity<String> verifyCustomerEmail(String vtoken) {
+	public GenericResponse verifyCustomerEmail(String vtoken) {
+		GenericResponse response;
 		Verification verification = verificationRepository.findByToken(vtoken)
 				.orElseThrow(AuthenticationException::new);
+		String emailAddress = verification.getEmail();
 
-		return (verification.isExpired())
-				? ResponseEntity.status(HttpStatus.BAD_REQUEST).body(discardRegistrationAttempt(verification))
-				: ResponseEntity.status(HttpStatus.ACCEPTED).body(enableVerifiedCustomer(verification));
+		if (verification.isExpired()) {
+			response = GenericResponse.failed(discardRegistrationAttempt(emailAddress));
+		}
+		else {
+			response = GenericResponse.successful(
+					"Verification Successful. Customer registered successfully and notified by email.",
+					enableVerifiedCustomer(emailAddress));
+		}
+
+		verificationRepository.delete(verification);
+		logger.info("Verification instance for {} has been deleted", emailAddress);
+
+		return response;
+	}
+	
+	//
+	@Override
+	public GenericResponse login(String usernameOrEmail, String password) {
+		if (!customerExists(usernameOrEmail)) return GenericResponse.failed("Invalid credentials");
+		
+		else if (getCustomerByEmailOrNull(usernameOrEmail).getAccount() == null) {
+			return GenericResponse.failed("Email unverified, kindly check your email inbox and click the verification link");
+		}
+		else if (getCustomerByEmailOrNull(usernameOrEmail).getPassword().equals(password)) {
+			return GenericResponse.successful("Login successful.");
+		}
+		else {
+			return GenericResponse.failed("Invalid credentials.");
+		}
 	}
 
-	private String enableVerifiedCustomer(Verification verification) {
-		String emailAddress = verification.getEmail();
-		customerRepository.findCustomerByEmailIgnoreCase(emailAddress).orElseThrow().setEnabled(true);
-		verificationRepository.delete(verification);
+	private Customer enableVerifiedCustomer(String emailAddress) {
+		Customer verifiedCustomer = customerRepository.findCustomerByEmailIgnoreCase(emailAddress).orElseThrow();
+		verifiedCustomer.setAccount(
+					UserAccount.builder()
+							.username(emailAddress)
+							.isEnabled(true)
+							.role(Roles.ROLE_USER)
+							.isLoggedIn(false)
+							.authorities(Set.of(ROLE_USER))
+							.build()
+		);
+		customerRepository.save(verifiedCustomer);
+		logger.info("Customer account created and enabled for {}.", emailAddress);
+
 		emailServiceOAuth.sendEmail(SimpleMailDTO
 				.builder()
-				.to(verification.getEmail())
+				.to(emailAddress)
 				.subject("Email Verified.")
 				.text("Your email address was successfully verified and your registration with EduInvest is complete. Kindly login to continue.")
 				.build());
+
 		logger.info("Email verification successful for {}. Customer enabled and verification object dismissed.", emailAddress);
-		return "Verification Successful. Customer registered successfully and notified by email.";
+		return verifiedCustomer;
 	}
 
-	private String discardRegistrationAttempt(Verification verification) {
-		String emailAddress = verification.getEmail();
+	private String discardRegistrationAttempt(String emailAddress) {
 		customerRepository.deleteCustomerByEmail(emailAddress);
 		logger.info("Customer with email {} has been deleted. Verification expired.", emailAddress);
 		emailServiceOAuth.sendEmail(SimpleMailDTO
@@ -142,8 +176,6 @@ public class CustomerServiceImpl implements CustomerService {
 						" Kindly register again.")
 				.build());
 		logger.info("Email notification sent to {} requesting re-registration.", emailAddress);
-		verificationRepository.delete(verification);
-		logger.info("Verification instance for {} has been deleted", emailAddress);
 		return "Verification failed. Token was expired. Registration for Customer with email " + emailAddress + " has been reversed.";
 	}
 
@@ -154,9 +186,8 @@ public class CustomerServiceImpl implements CustomerService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		//fixme: refactor to replace find by email... pass email here to act as the default find method
-		Customer customer = new Customer();
-		return customer.getAccount();
+		//fixme: refactor to replace find by email... (username is email for this application)
+		return getCustomerByEmailOrNull(username).getAccount();
 	}
 
 	@Override
@@ -185,23 +216,9 @@ public class CustomerServiceImpl implements CustomerService {
 
 		return customer.getAccount();
 	}
-
+	
 	private Customer createNewCustomer(String registrationId, Map<String, Object> attributes) {
-		Customer customer = new Customer();
-		customer.setEmail(String.valueOf(attributes.get("email")));
-		customer.setFirstName((String) attributes.get("given_name"));
-		customer.setLastName((String) attributes.get("family_name"));
-
-		UserAccount account = new UserAccount();
-		// Assuming AuthProvider is an enum that needs to be imported
-		// account.setProvider(AuthProvider.valueOf(registrationId.toUpperCase()));
-		account.setProviderId((String) attributes.get("sub"));
-		// Assuming Role is an enum that needs to be imported
-		// account.setRole(Role.CUSTOMER);
-		// account.setEnabled(true);
-
-		customer.setAccount(account);
-
-		return customerRepository.save(customer);
+		//FIXME:: Method body is placeholder, Implement correctly.
+		return new Customer();
 	}
 }
